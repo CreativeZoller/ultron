@@ -1,0 +1,11 @@
+{
+  "name": "forecast",
+  "version": "1.0.0",
+  "description": "Weather Forecast SPA",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zoltan Belicza",
+  "license": "ISC"
+}
