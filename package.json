@@ -15,7 +15,10 @@
   "devDependencies": {
     "bower": "^1.7.7",
     "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.1",
     "gulp-concat": "^2.6.0",
+    "gulp-connect": "^2.3.1",
+    "gulp-contrib-copy": "^0.1.2",
     "gulp-jshint": "^2.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.2.0",

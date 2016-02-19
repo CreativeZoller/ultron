@@ -7,6 +7,15 @@ var sass = require('gulp-sass');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
+var clean  = require('gulp-clean');
+var copy   = require('gulp-contrib-copy');
+var connect = require('gulp-connect');
+
+// Clean task
+gulp.task('clean', function() {
+	return gulp.src(['dist/*.html', 'dist/scripts/*.js', 'dist/styles/*.css'])
+		.pipe(clean());
+});
 
 // Lint Task
 gulp.task('lint', function() {
@@ -32,6 +41,22 @@ gulp.task('scripts', function() {
         .pipe(gulp.dest('dist/scripts'));
 });
 
+// Copy task
+gulp.task('copy', function() {
+	return gulp.src('*.html')
+		.pipe(copy())
+		.pipe(gulp.dest('dist'));
+});
+
+gulp.task('webserver', function() {
+	return connect.server({
+		root: 'dist',
+		livereload: true/*,
+		host: '0.0.0.0',
+		open: 'dist/index.html'*/
+	});
+});
+
 // Watch Files For Changes
 gulp.task('watch', function() {
     gulp.watch('scripts/*.js', ['lint', 'scripts']);
@@ -39,6 +64,5 @@ gulp.task('watch', function() {
 });
 
 // Tasks
-gulp.task('build', ['lint', 'scripts', 'sass']);
-gulp.task('default', ['build', 'watch']);
-//gulp.task('default', ['build', 'webserver', 'watch']);
+gulp.task('build', ['clean', 'lint', 'sass', 'copy', 'scripts']);
+gulp.task('default', ['build', 'webserver', 'watch']);

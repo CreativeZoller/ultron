@@ -18,7 +18,7 @@
 		}
 	}
 
-	var apiKey = '&units=metric&APPID=23b871370bd27cba1a9c217d9b882aba';
+	var apiKey = '&units=metric&APPID={XXXXXXXXXXXXXXXXXXXXX}';
 	var apiBaseUrl = 'http://api.openweathermap.org/data/2.5/';
 
 	addEvent(submit, "click", function () {
