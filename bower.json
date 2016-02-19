@@ -1,0 +1,24 @@
+{
+  "name": "forecast",
+  "description": "Weather Forecast SPA",
+  "main": "index.js",
+  "authors": [
+    "Zoltan Belicza"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/CreativeZoller/weatherforecast",
+  "moduleType": [
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.5.0",
+    "bootstrap-sass": "^3.3.6"
+  }
+}
