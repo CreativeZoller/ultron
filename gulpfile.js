@@ -1,9 +1,13 @@
-'use strict';
-
+"use strict";
+// Variables
 var gulp = require('gulp');
 var bower = require('gulp-bower');
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
+var gutil = require('gulp-util');
+var cache = require('gulp-cached');
+var del = require('del');
+var connect = require('gulp-connect');
 //var plumber = require('gulp-plumber');
 var notify = require("gulp-notify");
 var jshint = require('gulp-jshint');
@@ -19,39 +23,45 @@ var base64  = require('gulp-base64');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
-var cache = require('gulp-cached');
-var clean  = require('gulp-clean');
-var connect = require('gulp-connect');
 
-var duration = require('gulp-duration');
-var copy   = require('gulp-contrib-copy');
 
-// Variables
-var config = {
-    bowerDir: 'bower_components',
-     base: '.',
-    baseTemp: '.tmp/',
-    baseDepl: 'dist/',  // deployment
-    baseApp: 'app/',    // development
-    srcScripts: 'src/scripts/',
-    srcStyles: 'src/scss/',
-    srcImages: 'src/images/',
-    srcFonts: 'src/fonts/',
-    tempScripts: '.tmp/scripts/',
-    tempStyles: '.tmp/scss/',
-    tempImages: '.tmp/images/',
-    deplScripts: 'dist/scripts/',
-    deplStyles: 'dist/styles/',
-    deplImages: 'dist/images/',
-    deplFonts: 'dist/fonts/',
-    appScripts: 'app/scripts/',
-    appStyles: 'app/styles/',
-    appImages: 'app/images/',
-    appFonts: 'app/fonts/'
+var basePaths = {
+    src: 'src/',
+    dest: 'dist/',
+    dev: 'app/',
+    temp: '.tmp/',
+    bower: 'bower_components/'
+};
+var paths = {
+    images: {
+        src: basePaths.src + 'images/',
+        temp: basePaths.temp + 'images/',
+        dev: basePaths.dev + 'images/',
+        dest: basePaths.dest + 'images/'
+    },
+    scripts: {
+        src: basePaths.src + 'scripts/',
+        temp: basePaths.temp + 'scripts/',
+        dev: basePaths.dev + 'scripts/',
+        dest: basePaths.dest + 'scripts/'
+    },
+    styles: {
+        src: basePaths.src + 'scss/',
+        temp: basePaths.temp + 'scss/',
+        dev: basePaths.dev + 'styles/',
+        dest: basePaths.dest + 'styles/'
+    },
+    fonts: {
+        src: basePaths.bower + 'font-awesome/fonts/**.*',
+        dest: basePaths.src + 'fonts/'
+    }
 };
 
-// onErrort buheralni, majd copy tasket lecserelni mindenhol sima .pipe-ra
+// cache-t minden folyamatra applikalni rendesen
+// onErrort buheralni - gutil message
 // olvasni run-sequence hasznalatarol s kulonbozo folyamatokrol pl dist/dev agak egy folyamatban
+
+// esetleg egy git push origin master kellene mar pl krisz miatt
 
 // 5. css-regression test
 // 7. google-pagespeed and karma jasmine / mocha testing for our files
@@ -62,15 +72,9 @@ var config = {
 
 // Clean up the mess
 gulp.task('clean-up', function() {
-	return gulp.src(['app/**/*', '.tmp/**/*', 'src/**/*.map', 'src/fonts/**/*'], {read: false, force: true})
-		.pipe(clean()
-            /*.on('error', notify.onError({ message: "Cleaning failed"}))
-            .on('error', notify.onError(function (error) {
-                return "Error occured: " + error.message;
-            }))*/ 
-        )
-        .pipe(notify({ message: "Cleaning was successful", onLast: true }));
+    return del.sync(['app/**/*', '.tmp/**/*', 'src/**/*.map', 'src/fonts/**/*']);
 });
+
 gulp.task('clean-cache', function () {  // why error???
     return cache.clearAll();
 });
@@ -85,6 +89,14 @@ gulp.task('bower', function() { 
 });
 
 
+// Handle FontAwesome
+gulp.task('icons', function() { 
+    return gulp.src('bower_components/font-awesome/fonts/**.*') 
+        .pipe(gulp.dest('src/fonts/'))
+        .pipe(notify({ message: "Fonts were copied", onLast: true })); 
+});
+
+
 // Handle all images
 gulp.task('png-sprites', function () {
     return sprity.src({
@@ -92,8 +104,7 @@ gulp.task('png-sprites', function () {
         style: 'src/scss/sprites.scss',
         processor: 'sass',
     })
-    .pipe(gulpif('*.png', gulp.dest('.tmp/images/'), gulp.dest('.tmp/scss/')))
-    .pipe(notify({ message: "PNG-sprites were created", onLast: true }));
+    .pipe(gulpif('*.png', gulp.dest('.tmp/images/'), gulp.dest('.tmp/scss/')));
 });
 gulp.task('svg-sprites', function() {
     var config = {
@@ -121,13 +132,11 @@ gulp.task('svg-sprites', function() {
     };
     return gulp.src('src/images/**/*.svg')
         .pipe(svgSprite(config))
-        .pipe(gulp.dest('.'))
-        .pipe(notify({ message: "SVG-sprites were created", onLast: true }));
+        .pipe(gulp.dest('.'));
 });
-gulp.task('copy-img', ['png-sprites', 'svg-sprites'], function() {  // options to be implemented ??
-    return gulp.src('src/images/*.{gif,jpg,png,svg}')
-        .pipe(copy())
-        .pipe(gulp.dest('.tmp/images'));
+gulp.task('copy-img', ['png-sprites', 'svg-sprites'], function() { 
+    return gulp.src('src/images/*.{gif,jpg,png,svg}') 
+        .pipe(gulp.dest('.tmp/images/')); 
 });
 gulp.task('img-min', ['copy-img'], function() {
     return gulp.src('.tmp/images/*.{gif,jpg,png,svg}')
@@ -137,23 +146,14 @@ gulp.task('img-min', ['copy-img'], function() {
             optimizationLevel: 6
         }))
         .pipe(gulp.dest('app/images/'))
-        .pipe(notify({ message: "Image minifying was successful", onLast: true }));
-});
-
-
-// Handle FontAwesome
-gulp.task('icons', function() { 
-    return gulp.src('bower_components/font-awesome/fonts/**.*') 
-        .pipe(gulp.dest('src/fonts/'))
-        .pipe(notify({ message: "Fonts were copied", onLast: true })); 
+        .pipe(notify({ message: "Image tasks were successful", onLast: true }));
 });
 
 
 // Handle stylesheets
-gulp.task('copy-sass', function() {
-    return gulp.src('src/scss/**/*.scss')
-        .pipe(copy())
-        .pipe(gulp.dest('.tmp/scss/'));
+gulp.task('copy-sass', function() { 
+    return gulp.src('src/scss/**/*.scss') 
+        .pipe(gulp.dest('.tmp/scss/')); 
 });
 gulp.task('sass', ['copy-sass'], function() {
     return gulp.src('.tmp/scss/*.scss')
@@ -185,7 +185,8 @@ gulp.task('css-min', ['css-lint'], function () {
         .pipe(cssmin())
         .pipe(rename({suffix: '.min'}))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('app/styles'));
+        .pipe(gulp.dest('app/styles'))
+        .pipe(notify({ message: "CSS tasks were successful", onLast: true }));
 });
 
 
@@ -193,15 +194,13 @@ gulp.task('css-min', ['css-lint'], function () {
 gulp.task('script-lint', function() {
     return gulp.src('src/scripts/*.js')
         .pipe(jshint())
-        .pipe(jshint.reporter('jshint-stylish'))
-        .pipe(notify({ message: "Linting the scripts was successful", onLast: true }));
+        .pipe(jshint.reporter('jshint-stylish'));
 });
 gulp.task('concat-scripts', ['script-lint'], function() {
     return gulp.src('src/scripts/*.js')
         .pipe(cache('concat-scripts'))
         .pipe(concat('all.js'))
-        .pipe(gulp.dest('.tmp/scripts'))
-        .pipe(notify({ message: "Merging scripts was successful", onLast: true }));
+        .pipe(gulp.dest('.tmp/scripts'));
 });
 gulp.task('script-min', ['concat-scripts'], function() {
     return gulp.src('.tmp/scripts/all.js')
@@ -211,7 +210,7 @@ gulp.task('script-min', ['concat-scripts'], function() {
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('app/scripts'))
-        .pipe(notify({ message: "Script-minifying was successful", onLast: true }));
+        .pipe(notify({ message: "Script tasks were successful", onLast: true }));
 });
 
 
