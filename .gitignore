@@ -2,6 +2,7 @@
 ._*
 .DS_Store?
 .Trashes
+.tmp
 Desktop.ini
 node_modules
 bower_components
