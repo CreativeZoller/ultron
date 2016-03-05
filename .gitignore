@@ -1,9 +1,11 @@
 *.log
 ._*
-.DS_Store?
+.DS_Store
 .Trashes
 .tmp
 Desktop.ini
 node_modules
 bower_components
+app
 dist
+src
