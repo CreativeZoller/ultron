@@ -39,6 +39,7 @@
     "jshint-stylish": "^2.1.0",
     "mocha": "^2.4.5",
     "requirejs": "^2.1.22",
+    "run-sequence": "^1.1.5",
     "sprity": "^1.0.8",
     "sprity-sass": "^1.0.4"
   }
