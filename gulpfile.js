@@ -5,10 +5,10 @@ var bower = require('gulp-bower');
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var gutil = require('gulp-util');
-var cache = require('gulp-cached');
 var del = require('del');
 var runSequence = require('run-sequence');
-var connect = require('gulp-connect');
+var browserSync = require('browser-sync');
+var reload = browserSync.reload;
 var notify = require("gulp-notify");
 var jshint = require('gulp-jshint');
 var imagemin = require('gulp-imagemin');
@@ -24,16 +24,15 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 
-var isProduction = true;
-if(gutil.env.dev === true) isProduction = false;
+var isProduction = false;
+if(gutil.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
     gutil.log('File', gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', gutil.colors.magenta(evt.type));
 };
-
 var basePaths = {
     src: 'src/',
-    prod: 'dist/',
-    dev: 'app/',
+    prod: 'app/',
+    dev: 'devApp/',
     temp: '.tmp/',
     bower: 'bower_components/'
 };
@@ -62,27 +61,11 @@ var paths = {
     }
 };
 
-/*
-    npm prune - uninstall not used modules
-    rm -rf node_modules .. npm install - un and reinstall all local modules
-    bower prune - uninstall unused packages
-*/
 
-
-// W.I.P. fix runSequences, modify connect and watch to use browser-reload
-// making readme, git push original
-// 5. css-regression test
-// 7. google-pagespeed and karma jasmine / mocha testing for our files + variable usage and separated gulp files
-// 8. fire up Angular
-// gulp-svg2png and gulp-svgo to upgrade svg-sprites with fallback
-// http://code.tutsplus.com/tutorials/the-right-way-to-retinafy-your-websites--net-31793 ++ retina for png and svg sprites also
 
 // Clean up the mess
-gulp.task('cleanUp', ['cleanCache'], function() {
-    return del(['app/**/*', 'dist/**/*', '.tmp/**/*', 'src/**/*.map', 'src/fonts/**/*']);
-});
-gulp.task('cleanCache', function () {
-    return cache.caches = {};
+gulp.task('cleanUp', function() {
+    return del(['devApp/**/*', 'app/**/*', '.tmp/**/*', 'src/**/*.map', 'src/fonts/**/*']);
 });
 
 
@@ -98,14 +81,19 @@ gulp.task('bower', function() { 
 
 
 // Handle FontAwesome
-gulp.task('icons', function() { 
+gulp.task('fonts', function() { 
     return gulp.src('bower_components/font-awesome/fonts/**.*') 
-        .pipe(cache('icons'))
         .pipe(gulp.dest('src/fonts/'))
             .on('error', function(err){
                 new gutil.PluginError('copy font-awesome icon error', err, {showStack: true});
             })
         .pipe(notify({ message: "Fonts were copied", onLast: true })); 
+});
+
+// For initial testing purposes only
+gulp.task('index', function() { 
+    return gulp.src('index.html') 
+        .pipe(isProduction ? gulp.dest('app/') : gulp.dest('devApp/')); 
 });
 
 
@@ -119,7 +107,6 @@ gulp.task('pngSprites', function () {
         .on('error', function(err){
             new gutil.PluginError('png-sprite error', err, {showStack: true});
         })
-    .pipe(cache('pngSprites'))
     .pipe(gulpif('*.png', gulp.dest('.tmp/images/'), gulp.dest('.tmp/scss/')));
 });
 gulp.task('svgSprites', function() {
@@ -147,7 +134,6 @@ gulp.task('svgSprites', function() {
         }
     };
     return gulp.src('src/images/**/*.svg')
-        .pipe(cache('svgSprites'))
         .pipe(svgSprite(config))
             .on('error', function(err){
                 new gutil.PluginError('svg-sprite error', err, {showStack: true});
@@ -163,26 +149,27 @@ gulp.task('copyImgs', function() { 
 });
 gulp.task('imgMin', function() {
     return gulp.src('.tmp/images/*.{gif,jpg,png,svg}')
-        .pipe(imagemin({
+        .pipe(isProduction ? imagemin({
             progressive: true,
             interlaced: true,
             optimizationLevel: 6
-        }))
+        }) : gutil.noop())
             .on('error', function(err){
                 new gutil.PluginError('image minify error', err, {showStack: true});
             })
-        .pipe(isProduction ? gulp.dest('dist/images/') : gulp.dest('app/images/'))
+        .pipe(isProduction ? gulp.dest('app/images/') : gulp.dest('devApp/images/'))
         .pipe(notify({ message: "Image tasks were successful", onLast: true }));
 });
 gulp.task('imageBuild', function() {
-    runSequence(['pngSprites', 'svgSprites'], 'copyImgs', 'imgMin')
+    runSequence(['pngSprites', 'svgSprites'], 'copyImgs', 'imgMin', function() {
+        reload({ stream: true })
+    })
 });
 
 
 // Handle stylesheets
 gulp.task('copySass', function() { 
     return gulp.src('src/scss/**/*.scss') 
-        .pipe(cache('copy-sass'))
         .pipe(gulp.dest('.tmp/scss/'))
             .on('error', function(err){
                 new gutil.PluginError('scss copy error', err, {showStack: true});
@@ -190,7 +177,6 @@ gulp.task('copySass', function() { 
 });
 gulp.task('sassCompile', function() {
     return gulp.src('.tmp/scss/*.scss')
-        .pipe(cache('sass'))
         .pipe(sass())
             .on('error', function(err){
                 new gutil.PluginError('scss compile error', err, {showStack: true});
@@ -199,7 +185,6 @@ gulp.task('sassCompile', function() {
 });
 gulp.task('preFix', function () {
     return gulp.src(['.tmp/scss/*.css', '!.tmp/scss/bootstrap.css', '!.tmp/scss/*.min.css'])
-        .pipe(cache('prefix'))
         .pipe(autoprefixer({
             browsers: ['> 10%', 'last 2 Chrome versions', 'last 2 Firefox versions', 'last 2 Opera versions', 'last 2 Safari versions', 'not ie <= 10'],
             cascade: false
@@ -230,14 +215,16 @@ gulp.task('cssMin', function () {
         .pipe(isProduction ? cssmin() : gutil.noop())
         .pipe(rename({suffix: '.min'}))
         .pipe(isProduction ? sourcemaps.write('.') : gutil.noop())
-        .pipe(isProduction ? gulp.dest('dist/styles/') : gulp.dest('app/styles/'))
+        .pipe(isProduction ? gulp.dest('app/styles/') : gulp.dest('devApp/styles/'))
             .on('error', function(err){
                 new gutil.PluginError('css minification error', err, {showStack: true});
             })
         .pipe(notify({ message: "CSS tasks were successful", onLast: true }));
 });
 gulp.task('styleBuild', function() {
-    runSequence('copySass', 'sassCompile', 'preFix', 'cssLint', 'cssMin')
+    runSequence('copySass', 'sassCompile', 'preFix', 'cssLint', 'cssMin', function() {
+        reload({ stream: true })
+    })
 });
 
 
@@ -252,55 +239,46 @@ gulp.task('scriptLint', function() {
 });
 gulp.task('concatScripts', function() {
     return gulp.src('src/scripts/*.js')
-        .pipe(cache('concat-scripts'))
         .pipe(concat('all.js'))
         .pipe(gulp.dest('.tmp/scripts'));
 });
 gulp.task('scriptMin', function() {
     return gulp.src('.tmp/scripts/all.js')
-        .pipe(cache('script-min'))
         .pipe(isProduction ? sourcemaps.init() : gutil.noop())
         .pipe(rename('all.min.js'))
         .pipe(isProduction ? uglify() : gutil.noop())
         .pipe(isProduction ? sourcemaps.write('.') : gutil.noop())
-        .pipe(isProduction ? gulp.dest('dist/scripts/') : gulp.dest('app/scripts/'))
+        .pipe(isProduction ? gulp.dest('app/scripts/') : gulp.dest('devApp/scripts/'))
             .on('error', function(err){
                 new gutil.PluginError('script minification error', err, {showStack: true});
             })
         .pipe(notify({ message: "Script tasks were successful", onLast: true }));
 });
 gulp.task('scriptBuild', function() {
-    runSequence('scriptLint', 'concatScripts', 'scriptMin')
+    runSequence('scriptLint', 'concatScripts', 'scriptMin', function() {
+        reload({ stream: true })
+    })
 });
 
 
-// Watch tasks -  livereload + optimize
-gulp.task('watch', function(){
-    gulp.watch('src/images/**/*.{png,svg,jpg,gif}', ['img-min']).on('change', function(evt) {
-        changeEvent(evt);
-    });
-    gulp.watch('src/scss/*.scss', ['css-min']).on('change', function(evt) {
-        changeEvent(evt);
-    });
-    gulp.watch('src/scripts/*.js', ['script-min']).on('change', function(evt) {
-        changeEvent(evt);
-    });
-});
-
-
-// Webserver tasks - livereload
-gulp.task('webserver', function() {
-    return connect.server({
-        root: 'app',
-        livereload: true
-    });
-});
-
-
+// Webserver tasks
 gulp.task('build', function() {
-    runSequence('cleanUp', ['icons', 'imageBuild', 'scriptBuild'], 'styleBuild');
+    runSequence('cleanUp', ['fonts', 'imageBuild', 'scriptBuild'], 'index', 'styleBuild');
 });
-gulp.task('launch', function() {
-    runSequence('build', 'webserver', 'watch');
+gulp.task('serve', function() {
+    browserSync({
+        server: {
+        baseDir: 'devApp'
+        }
+    });
+    gulp.watch('src/scss/**/*.scss', ['styleBuild']).on('change', function(evt) {
+        changeEvent(evt);
+    });
+    gulp.watch('src/scripts/**/*.js', ['scriptBuild']).on('change', function(evt) {
+        changeEvent(evt);
+    });
+    gulp.watch('src/images/**/*.{png,svg,jpg,gif}', ['imageBuild']).on('change', function(evt) {
+        changeEvent(evt);
+    });
 });
 
