@@ -6,6 +6,8 @@ var sprity = require('sprity');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
+var ngrok = require('ngrok');
+var psi = require('psi');
 var plugins = require("gulp-load-plugins")({
     DEBUG: false,
     scope: 'devDependencies',
@@ -23,7 +25,8 @@ var basePaths = {
     prod: 'app/',
     dev: 'devApp/',
     temp: '.tmp/',
-    bower: 'bower_components/'
+    bower: 'bower_components/',
+    test: 'src/tests/'
 };
 var paths = {
     images: {
@@ -261,16 +264,59 @@ gulp.task('scriptBuild', function() {
 });
 
 
+// Google PageSpeed Insight task after deploying to server - BUGGY
+var key = 'AIzaSyC_6gTJhgTdR9BQFj9xlY5KegWYViGy56c';
+var site = '';
+var portVal = 3020;
+gulp.task('ngrok-url', function(cb) {
+    return ngrok.connect({
+            authtoken: '38DRf7nSNjWxY7DWWN6dN_4wSm65v6pUpXjZYRWXqbQ',
+            httpauth: 'login:password',
+            port: portVal
+        }, function (err, url) {
+            if(err !== null) console.log(err);
+            site = url;
+            console.log('serving your tunnel from: ' + site + '/' + url);
+            cb();
+        });
+});
+gulp.task('psi-desktop', function (cb) {
+    psi(site, {
+        //key: key,
+        nokey: 'true',
+        strategy: 'desktop'
+    }, cb);
+});
+gulp.task('psi-mobile', function (cb) {
+    psi(site, {
+        //key: key,
+        nokey: 'true',
+        strategy: 'mobile'
+    }, cb);
+});
+gulp.task('psi-seq', function (cb) {
+    return runSequence(
+        'servePsi',
+        'ngrok-url',
+        'psi-desktop',
+        'psi-mobile',
+        cb
+    );
+});
+gulp.task('psi', ['psi-seq'], function() {
+  console.log('Woohoo! Check out your page speed scores!');
+  process.exit();
+});
+
+
+// RegressionTesting
+
+
 // Webserver tasks
 gulp.task('build', function() {
     runSequence('cleanUp', 'index', 'fonts', 'imageBuild', 'styleBuild', 'scriptBuild')
 });
-gulp.task('serve', function() {
-    browserSync({
-        server: {
-        baseDir: 'devApp'
-        }
-    });
+gulp.task('nightWatch', ['serve'], function() {
     gulp.watch('src/scss/**/*.scss', ['styleBuild']).on('change', function(evt) {
         changeEvent(evt);
     });
@@ -279,6 +325,23 @@ gulp.task('serve', function() {
     });
     gulp.watch('src/images/**/*.{png,svg,jpg,gif}', ['imageBuild']).on('change', function(evt) {
         changeEvent(evt);
+    });
+});
+gulp.task('servePsi', function() {
+    browserSync({
+        port: portVal,
+        open: false,
+        server: {
+            baseDir: 'devApp'
+        }
+    });
+});
+gulp.task('serve', function() {
+    browserSync({
+        open: true,
+        server: {
+            baseDir: 'devApp'
+        }
     });
 });
 
