@@ -21,12 +21,18 @@ var changeEvent = function(evt) {
     plugins.util.log('File', plugins.gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', plugins.util.colors.magenta(evt.type));
 };
 var basePaths = {
+    root: '.',
     src: 'src/',
     prod: 'app/',
     dev: 'devApp/',
     temp: '.tmp/',
     bower: 'bower_components/',
-    test: 'src/tests/'
+    test: 'src/tests/',
+    devFiles: 'devApp/**/*',
+    prodFiles: 'app/**/*',
+    tempFiles: '.tmp/**/*',
+    srcFonts: 'src/fonts/**/*',
+    srcMaps: 'src/**/*.map'
 };
 var paths = {
     images: {
@@ -56,13 +62,13 @@ var paths = {
 
 // Clean up the mess
 gulp.task('cleanUp', function() {
-    return del(['devApp/**/*', 'app/**/*', '.tmp/**/*', 'src/fonts/**/*', 'src/**/*.map']);
+    del([basePaths.devFiles, basePaths.prodFiles, basePaths.tempFiles, basePaths.srcFonts, basePaths.srcMaps]);
 });
 
 // Init the bower install command
 gulp.task('bower', function() { 
     return plugins.bower()
-         .pipe(gulp.dest('bower_components/')) 
+         .pipe(gulp.dest(basePaths.bower)) 
             .on('error', function(err){
                 new plugins.util.PluginError('bower package install error', err, {showStack: true});
             })
@@ -71,8 +77,8 @@ gulp.task('bower', function() { 
 
 // Handle FontAwesome
 gulp.task('fonts', function() { 
-    return gulp.src('bower_components/font-awesome/fonts/**.*') 
-        .pipe(gulp.dest('src/fonts/'))
+    return gulp.src(paths.fonts.src) 
+        .pipe(gulp.dest(paths.fonts.prod))
             .on('error', function(err){
                 new plugins.util.PluginError('copy font-awesome icon error', err, {showStack: true});
             })
@@ -82,26 +88,26 @@ gulp.task('fonts', function() { 
 // For initial testing purposes only
 gulp.task('index', function() { 
     return gulp.src('index.html') 
-        .pipe(isProduction ? gulp.dest('app/') : gulp.dest('devApp/')); 
+        .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
 });
 
 
 // Handle all images
 gulp.task('pngSprites', function() {
     return sprity.src({
-        src: 'src/images/**/*.{png,jpg}',
-        style: 'src/scss/sprites.scss',
+        src: paths.images.src + '**/*.{png,jpg}',
+        style: paths.styles.src + 'sprites.scss',
         processor: 'sass',
     })
         .on('error', function(err){
             new plugins.util.PluginError('png-sprite error', err, {showStack: true});
         })
-    .pipe(plugins.if('*.png', gulp.dest('.tmp/images/'), gulp.dest('.tmp/scss/')));
+    .pipe(plugins.if('*.png', gulp.dest(paths.images.temp), gulp.dest(paths.styles.temp)));
 });
 gulp.task('retinaSprites', function() {
-    var spriteData = gulp.src('src/images/sprites2x/*.png')
+    var spriteData = gulp.src(paths.images.src + 'sprites2x/*.png')
         .pipe(plugins.spritesmith({
-            retinaSrcFilter: 'src/images/sprites2x/*-2x.png',
+            retinaSrcFilter: paths.images.src + 'sprites2x/*-2x.png',
             imgName: 'spritesheet.png',
             retinaImgName: 'spritesheet-2x.png',
             cssName: 'sprites-2x.scss'
@@ -109,12 +115,12 @@ gulp.task('retinaSprites', function() {
             .on('error', function(err){
                 new plugins.util.PluginError('retina sprite error', err, {showStack: true});
             });
-    spriteData.img.pipe(gulp.dest('.tmp/images/'));
-    spriteData.css.pipe(gulp.dest('.tmp/scss/'));
+    spriteData.img.pipe(gulp.dest(paths.images.temp));
+    spriteData.css.pipe(gulp.dest(paths.styles.temp));
 });
 gulp.task('svgSprites', function() {
     var config = {
-        dest : '.',
+        dest : basePaths.root,
         shape : {
             dimension : {
                 maxWidth: 128,
@@ -126,17 +132,17 @@ gulp.task('svgSprites', function() {
         },
         mode : {
             css : {
-                dest : '.',
-                sprite : '.tmp/images/sprites.svg',
+                dest : basePaths.root,
+                sprite : paths.images.temp + 'sprites.svg',
                 render : {
                     scss : {
-                        dest : '.tmp/scss/svg_sprites.scss'
+                        dest : paths.styles.temp + 'svg_sprites.scss'
                     }
                 },
             }
         }
     };
-    return gulp.src('src/images/**/*.svg')
+    return gulp.src(paths.images.src + '**/*.svg')
         .pipe(plugins.svgSprite(config))
             .on('error', function(err){
                 new plugins.util.PluginError('svg-sprite error', err, {showStack: true});
@@ -144,14 +150,14 @@ gulp.task('svgSprites', function() {
         .pipe(gulp.dest('.'));
 });
 gulp.task('copyImgs', function() { 
-    return gulp.src('src/images/*.{gif,jpg,png,svg}') 
-        .pipe(gulp.dest('.tmp/images/'))
+    return gulp.src(paths.images.src + '*.{gif,jpg,png,svg}') 
+        .pipe(gulp.dest(paths.images.temp))
             .on('error', function(err){
                 new plugins.util.PluginError('image copy error', err, {showStack: true});
             }); 
 });
 gulp.task('imgMin', function() {
-    return gulp.src('.tmp/images/*.{gif,jpg,png,svg}')
+    return gulp.src(paths.images.temp + '*.{gif,jpg,png,svg}')
         .pipe(isProduction ? plugins.imagemin({
             progressive: true,
             interlaced: true,
@@ -160,7 +166,7 @@ gulp.task('imgMin', function() {
             .on('error', function(err){
                 new plugins.util.PluginError('image minify error', err, {showStack: true});
             })
-        .pipe(isProduction ? gulp.dest('app/images/') : gulp.dest('devApp/images/'))
+        .pipe(isProduction ? gulp.dest(paths.images.prod) : gulp.dest(paths.images.dev))
         .pipe(plugins.notify({ message: "Image tasks were successful", onLast: true }));
 });
 gulp.task('imageBuild', function() {
@@ -172,22 +178,22 @@ gulp.task('imageBuild', function() {
 
 // Handle stylesheets
 gulp.task('copySass', function() { 
-    return gulp.src('src/scss/**/*.scss') 
-        .pipe(gulp.dest('.tmp/scss'))
+    return gulp.src(paths.styles.src + '**/*.scss') 
+        .pipe(gulp.dest(paths.styles.temp))
             .on('error', function(err){
                 new plugins.util.PluginError('scss copy error', err, {showStack: true});
             }); 
 });
 gulp.task('sassCompile', function() {
-    return gulp.src('.tmp/scss/*.scss')
+    return gulp.src(paths.styles.temp + '*.scss')
         .pipe(plugins.sass())
             .on('error', function(err){
                 new plugins.util.PluginError('scss compile error', err, {showStack: true});
             })
-        .pipe(gulp.dest('.tmp/scss'));
+        .pipe(gulp.dest(paths.styles.temp));
 });
 gulp.task('preFix', function () {
-    return gulp.src(['.tmp/scss/*.css', '!.tmp/scss/bootstrap.css', '!.tmp/scss/*.min.css'])
+    return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + 'bootstrap.css', '!' + paths.styles.temp + '*.min.css'])
         .pipe(plugins.autoprefixer({
             browsers: ['> 10%', 'last 2 Chrome versions', 'last 2 Firefox versions', 'last 2 Opera versions', 'last 2 Safari versions', 'not ie <= 10'],
             cascade: false
@@ -202,10 +208,10 @@ gulp.task('preFix', function () {
             .on('error', function(err){
                 new plugins.util.PluginError('base64 replacement error', err, {showStack: true});
             })
-        .pipe(gulp.dest('.tmp/scss'));
+        .pipe(gulp.dest(paths.styles.temp));
 });
 gulp.task('cssLint', function() {
-    return gulp.src(['.tmp/scss/*.css', '!.tmp/scss/*.min.css', '!.tmp/scss/bootstrap.css','!.tmp/scss/fontawesome.css'])
+    return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + '*.min.css', '!' + paths.styles.temp + 'bootstrap.css','!' + paths.styles.temp + 'fontawesome.css'])
         .pipe(isProduction ? plugins.util.noop() : plugins.csslint())
             .on('error', function(err){
                 new plugins.util.PluginError('css linting error', err, {showStack: true});
@@ -213,12 +219,12 @@ gulp.task('cssLint', function() {
         .pipe(plugins.csslint.reporter());
 });
 gulp.task('cssMin', function () {
-    return gulp.src(['.tmp/scss/*.css', '!.tmp/scss/*.min.css'])
+    return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + '*.min.css'])
         .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
         .pipe(isProduction ? plugins.cssmin() : plugins.util.noop())
         .pipe(plugins.rename({suffix: '.min'}))
         .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
-        .pipe(isProduction ? gulp.dest('app/styles/') : gulp.dest('devApp/styles/'))
+        .pipe(isProduction ? gulp.dest(paths.styles.prod) : gulp.dest(paths.styles.dev))
             .on('error', function(err){
                 new plugins.util.PluginError('css minification error', err, {showStack: true});
             })
@@ -233,7 +239,7 @@ gulp.task('styleBuild', function() {
 
 // Handle scripts
 gulp.task('scriptLint', function() {
-    return gulp.src('src/scripts/*.js')
+    return gulp.src(paths.scripts.src + '*.js')
         .pipe(isProduction ? plugins.util.noop() : plugins.jshint())
             .on('error', function(err){
                 new plugins.util.PluginError('script linting error', err, {showStack: true});
@@ -241,17 +247,17 @@ gulp.task('scriptLint', function() {
         .pipe(plugins.jshint.reporter('jshint-stylish'));
 });
 gulp.task('concatScripts', function() {
-    return gulp.src('src/scripts/*.js')
+    return gulp.src(paths.scripts.src + '*.js')
         .pipe(plugins.concat('all.js'))
-        .pipe(gulp.dest('.tmp/scripts'));
+        .pipe(gulp.dest(paths.scripts.temp));
 });
 gulp.task('scriptMin', function() {
-    return gulp.src('.tmp/scripts/all.js')
+    return gulp.src(paths.scripts.temp + 'all.js')
         .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
         .pipe(plugins.rename('all.min.js'))
         .pipe(isProduction ? plugins.uglify() : plugins.util.noop())
         .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
-        .pipe(isProduction ? gulp.dest('app/scripts/') : gulp.dest('devApp/scripts/'))
+        .pipe(isProduction ? gulp.dest(paths.scripts.prod) : gulp.dest(paths.scripts.dev))
             .on('error', function(err){
                 new plugins.util.PluginError('script minification error', err, {showStack: true});
             })
@@ -309,21 +315,19 @@ gulp.task('psi', ['psi-seq'], function() {
 });
 
 
-// RegressionTesting
-
 
 // Webserver tasks
 gulp.task('build', function() {
     runSequence('cleanUp', 'index', 'fonts', 'imageBuild', 'styleBuild', 'scriptBuild')
 });
 gulp.task('nightWatch', ['serve'], function() {
-    gulp.watch('src/scss/**/*.scss', ['styleBuild']).on('change', function(evt) {
+    gulp.watch(paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
         changeEvent(evt);
     });
-    gulp.watch('src/scripts/**/*.js', ['scriptBuild']).on('change', function(evt) {
+    gulp.watch(paths.scripts.src + '**/*.js', ['scriptBuild']).on('change', function(evt) {
         changeEvent(evt);
     });
-    gulp.watch('src/images/**/*.{png,svg,jpg,gif}', ['imageBuild']).on('change', function(evt) {
+    gulp.watch(paths.images.src + '**/*.{png,svg,jpg,gif}', ['imageBuild']).on('change', function(evt) {
         changeEvent(evt);
     });
 });
@@ -332,7 +336,7 @@ gulp.task('servePsi', function() {
         port: portVal,
         open: false,
         server: {
-            baseDir: 'devApp'
+            baseDir: paths.scripts.dev
         }
     });
 });
@@ -340,7 +344,7 @@ gulp.task('serve', function() {
     browserSync({
         open: true,
         server: {
-            baseDir: 'devApp'
+            baseDir: paths.scripts.dev
         }
     });
 });
