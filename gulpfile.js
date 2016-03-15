@@ -91,6 +91,13 @@ gulp.task('index', function() { 
         .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
 });
 
+// Check the compiled html files
+gulp.task('checkHtml', function() {
+    return gulp.src([basePaths.prod + '**/*.html', basePaths.dev + '**/*.html', basePaths.root + '/*.html'])
+        .pipe(isProduction ? plugins.util.noop() : plugins.htmlhint('.htmlhintrc'))
+        .pipe(plugins.htmlhint.reporter("htmlhint-stylish")) ;
+});
+
 
 // Handle all images
 gulp.task('pngSprites', function() {
@@ -240,11 +247,16 @@ gulp.task('styleBuild', function() {
 // Handle scripts
 gulp.task('scriptLint', function() {
     return gulp.src(paths.scripts.src + '*.js')
-        .pipe(isProduction ? plugins.util.noop() : plugins.jshint())
+        .pipe(isProduction ? plugins.util.noop() : plugins.jshint('.jshintrc'))
             .on('error', function(err){
                 new plugins.util.PluginError('script linting error', err, {showStack: true});
             })
         .pipe(plugins.jshint.reporter('jshint-stylish'));
+});
+gulp.task('scriptFix', function() {
+    return gulp.src(paths.scripts.src + '*.js')
+        .pipe(isProduction ? plugins.util.noop() : plugins.fixmyjs())
+        .pipe(gulp.dest(paths.scripts.src));
 });
 gulp.task('concatScripts', function() {
     return gulp.src(paths.scripts.src + '*.js')
@@ -264,55 +276,13 @@ gulp.task('scriptMin', function() {
         .pipe(plugins.notify({ message: "Script tasks were successful", onLast: true }));
 });
 gulp.task('scriptBuild', function() {
-    runSequence('scriptLint', 'concatScripts', 'scriptMin', function() {
+    runSequence('scriptLint', 'scriptFix', 'concatScripts', 'scriptMin', function() {
         reload({ stream: true })
     })
 });
 
 
-// Google PageSpeed Insight task after deploying to server - BUGGY
-var key = 'AIzaSyC_6gTJhgTdR9BQFj9xlY5KegWYViGy56c';
-var site = '';
-var portVal = 3020;
-gulp.task('ngrok-url', function(cb) {
-    return ngrok.connect({
-            authtoken: '38DRf7nSNjWxY7DWWN6dN_4wSm65v6pUpXjZYRWXqbQ',
-            httpauth: 'login:password',
-            port: portVal
-        }, function (err, url) {
-            if(err !== null) console.log(err);
-            site = url;
-            console.log('serving your tunnel from: ' + site + '/' + url);
-            cb();
-        });
-});
-gulp.task('psi-desktop', function (cb) {
-    psi(site, {
-        //key: key,
-        nokey: 'true',
-        strategy: 'desktop'
-    }, cb);
-});
-gulp.task('psi-mobile', function (cb) {
-    psi(site, {
-        //key: key,
-        nokey: 'true',
-        strategy: 'mobile'
-    }, cb);
-});
-gulp.task('psi-seq', function (cb) {
-    return runSequence(
-        'servePsi',
-        'ngrok-url',
-        'psi-desktop',
-        'psi-mobile',
-        cb
-    );
-});
-gulp.task('psi', ['psi-seq'], function() {
-  console.log('Woohoo! Check out your page speed scores!');
-  process.exit();
-});
+// ES6
 
 
 
@@ -329,15 +299,6 @@ gulp.task('nightWatch', ['serve'], function() {
     });
     gulp.watch(paths.images.src + '**/*.{png,svg,jpg,gif}', ['imageBuild']).on('change', function(evt) {
         changeEvent(evt);
-    });
-});
-gulp.task('servePsi', function() {
-    browserSync({
-        port: portVal,
-        open: false,
-        server: {
-            baseDir: paths.scripts.dev
-        }
     });
 });
 gulp.task('serve', function() {
