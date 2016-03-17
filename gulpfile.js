@@ -258,8 +258,13 @@ gulp.task('scriptFix', function() {
         .pipe(isProduction ? plugins.util.noop() : plugins.fixmyjs())
         .pipe(gulp.dest(paths.scripts.src));
 });
-gulp.task('concatScripts', function() {
+gulp.task('scriptModernizr', function() {
     return gulp.src(paths.scripts.src + '*.js')
+        .pipe(plugins.modernizr())
+        .pipe(gulp.dest(paths.scripts.src))
+});
+gulp.task('concatScripts', function() {
+    return gulp.src(paths.scripts.src + '*.js', '!' + paths.scripts.src + 'modernizr.js')
         .pipe(plugins.concat('all.js'))
         .pipe(gulp.dest(paths.scripts.temp));
 });
@@ -276,7 +281,7 @@ gulp.task('scriptMin', function() {
         .pipe(plugins.notify({ message: "Script tasks were successful", onLast: true }));
 });
 gulp.task('scriptBuild', function() {
-    runSequence('scriptLint', 'scriptFix', 'concatScripts', 'scriptMin', function() {
+    runSequence('scriptLint', 'scriptFix', 'scriptModernizr', 'concatScripts', 'scriptMin', function() {
         reload({ stream: true })
     })
 });
