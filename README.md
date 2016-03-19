@@ -25,7 +25,7 @@ I used [Node v5.6.0](https://nodejs.org/en/download/releases/) and NPM v3.7.2(np
 ## Usage
 First -if you want- copy the content of the Extra folder to your forked root, and remove the Extra folder because you won't need it anymore.
 
-Create a file in your root, name it secretConf.json, because this could be used in gulpfile. for example you can use your username and password for google as keys from this file.
+Create a file in your root, name it secretConf.json, because this could be used in gulpfile. For example you can use your username and password for google as keys from this file.
 
 After running `npm install && npm prune` you'll get every necessary package - and just them, you can use all the gulp commands. I recommend to run `gulp bower` because it will install all package from bower.json into the bower_components folder and also execute the prune command.
 
