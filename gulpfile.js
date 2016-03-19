@@ -1,13 +1,5 @@
 "use strict";
-// Variables
 var gulp = require('gulp');
-var del = require('del');
-var sprity = require('sprity');
-var runSequence = require('run-sequence');
-var browserSync = require('browser-sync');
-var reload = browserSync.reload;
-var ngrok = require('ngrok');
-var psi = require('psi');
 var plugins = require("gulp-load-plugins")({
     DEBUG: false,
     scope: 'devDependencies',
@@ -15,13 +7,19 @@ var plugins = require("gulp-load-plugins")({
     pattern: ['gulp-*', 'gulp.*'],
     replaceString: /\bgulp[\-.]/
 });
+var del = require('del');
+var sprity = require('sprity');
+var runSequence = require('run-sequence');
+var browserSync = require('browser-sync');
+var reload = browserSync.reload;
+var config = require('./secretConf.json');
 var isProduction = false;
 if(plugins.util.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
     plugins.util.log('File', plugins.gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', plugins.util.colors.magenta(evt.type));
 };
 var basePaths = {
-    root: '.',
+    root: './',
     src: 'src/',
     prod: 'app/',
     dev: 'devApp/',
@@ -31,7 +29,7 @@ var basePaths = {
     devFiles: 'devApp/**/*',
     prodFiles: 'app/**/*',
     tempFiles: '.tmp/**/*',
-    srcFonts: 'src/fonts/**/*',
+    srcFonts: 'src/scss/fonts/*',
     srcMaps: 'src/**/*.map'
 };
 var paths = {
@@ -59,6 +57,7 @@ var paths = {
     }
 };
 
+// using external config data like: config.desktop
 
 // Clean up the mess
 gulp.task('cleanUp', function() {
@@ -71,6 +70,10 @@ gulp.task('bower', function() { 
          .pipe(gulp.dest(basePaths.bower)) 
             .on('error', function(err){
                 new plugins.util.PluginError('bower package install error', err, {showStack: true});
+            })
+        .pipe(plugins.bower({ cmd: 'prune'}))
+            .on('error', function(err){
+                new plugins.util.PluginError('bower cleaning error', err, {showStack: true});
             })
         .pipe(plugins.notify({ message: "Bower installation was successful", onLast: true }));
 });
@@ -90,12 +93,25 @@ gulp.task('index', function() { 
     return gulp.src('index.html') 
         .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
 });
-
 // Check the compiled html files
 gulp.task('checkHtml', function() {
     return gulp.src([basePaths.prod + '**/*.html', basePaths.dev + '**/*.html', basePaths.root + '/*.html'])
         .pipe(isProduction ? plugins.util.noop() : plugins.htmlhint('.htmlhintrc'))
+            .on('error', function(err){
+                new plugins.util.PluginError('html linting error', err, {showStack: true});
+            })
         .pipe(plugins.htmlhint.reporter("htmlhint-stylish")) ;
+});
+// Dinamycally replacing blocks in all compiled html
+gulp.task('replaceHtml', function () {
+    return gulp.src([basePaths.root + '*.html', basePaths.prod + '*.html', basePaths.dev + '*.html'])
+        .pipe(isProduction ?
+            plugins.inject(gulp.src([paths.scripts.prod + '*.js', paths.styles.prod + '*.css'], {read: true}), {relative: true}) :
+            plugins.inject(gulp.src([paths.scripts.dev + '*.js', paths.styles.dev + '*.css'], {read: true}), {relative: true}))
+            .on('error', function(err){
+                new plugins.util.PluginError('html injection error', err, {showStack: true});
+            })
+        .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
 });
 
 
@@ -256,22 +272,31 @@ gulp.task('scriptLint', function() {
 gulp.task('scriptFix', function() {
     return gulp.src(paths.scripts.src + '*.js')
         .pipe(isProduction ? plugins.util.noop() : plugins.fixmyjs())
+            .on('error', function(err){
+                new plugins.util.PluginError('script fixing error', err, {showStack: true});
+            })
         .pipe(gulp.dest(paths.scripts.src));
 });
 gulp.task('scriptModernizr', function() {
     return gulp.src(paths.scripts.src + '*.js')
         .pipe(plugins.modernizr())
-        .pipe(gulp.dest(paths.scripts.src))
+            .on('error', function(err){
+                new plugins.util.PluginError('modernizr generating error', err, {showStack: true});
+            })
+        .pipe(isProduction ? gulp.dest(paths.scripts.prod) : gulp.dest(paths.scripts.dev))
 });
 gulp.task('concatScripts', function() {
-    return gulp.src(paths.scripts.src + '*.js', '!' + paths.scripts.src + 'modernizr.js')
-        .pipe(plugins.concat('all.js'))
+    return gulp.src(paths.scripts.src + '*.js')
+        .pipe(plugins.concat('main.js'))
+            .on('error', function(err){
+                new plugins.util.PluginError('script concatenate error', err, {showStack: true});
+            })
         .pipe(gulp.dest(paths.scripts.temp));
 });
 gulp.task('scriptMin', function() {
-    return gulp.src(paths.scripts.temp + 'all.js')
+    return gulp.src(paths.scripts.temp + 'main.js')
         .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
-        .pipe(plugins.rename('all.min.js'))
+        .pipe(plugins.rename('main.min.js'))
         .pipe(isProduction ? plugins.uglify() : plugins.util.noop())
         .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
         .pipe(isProduction ? gulp.dest(paths.scripts.prod) : gulp.dest(paths.scripts.dev))
@@ -287,13 +312,9 @@ gulp.task('scriptBuild', function() {
 });
 
 
-// ES6
-
-
-
 // Webserver tasks
 gulp.task('build', function() {
-    runSequence('cleanUp', 'index', 'fonts', 'imageBuild', 'styleBuild', 'scriptBuild')
+    runSequence('cleanUp', 'imageBuild', 'styleBuild', 'scriptBuild')
 });
 gulp.task('nightWatch', ['serve'], function() {
     gulp.watch(paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
