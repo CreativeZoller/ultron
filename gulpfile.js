@@ -330,6 +330,7 @@ gulp.task('nightWatch', ['serve'], function() {
 gulp.task('serve', function() {
     browserSync({
         open: true,
+        reloadOnRestart: true,
         server: {
             baseDir: paths.scripts.dev
         }
