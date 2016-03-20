@@ -15,7 +15,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      './src/tests/MySpec.js'
+      'src/tests/MySpec.js'
     ],
 
 
