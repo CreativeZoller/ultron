@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Ultron is a development dependency for future projects. It is a basic frame for front-end tasks, including some test functions.",
   "scripts": {
-    "test": "karma start src/tests/myKarma.conf.js"
+    "test": "karma start --single-run"
   },
   "repository": {
     "type": "git",
