@@ -3,6 +3,7 @@ node_js:
   - "stable"
 install:
   - npm install
+  - npm prune
   - npm install -g gulp
   - gulp bower
   - npm install -g karma
