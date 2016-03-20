@@ -15,20 +15,19 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/tests/MySpec.js',
-      'MySpec.js'
+      'src/tests/MySpec.js'
     ],
 
 
     // list of files to exclude
-    exclude: [
-    ],
+    //exclude: [
+    //],
 
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {
-    },
+    //preprocessors: {
+    //},
 
 
     // test results reporter to use
@@ -38,7 +37,7 @@ module.exports = function(config) {
 
 
     // web server port
-    port: 9876,
+    //port: 9876,
 
 
     // enable / disable colors in the output (reporters and logs)
@@ -56,18 +55,22 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers : ['Chrome', 'PhantomJS'],
 
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity,
 
     // you can define custom flags
+    phantomjsLauncher: {
+      // Have phantomjs exit if a ResourceError is encountered (useful if karma exits without killing phantom)
+      exitOnResourceError: true
+    }
 
   })
 }
