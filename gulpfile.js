@@ -12,7 +12,8 @@ var sprity = require('sprity');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
-var config = require('./secretConf.json');
+//var config = require('./secretConf.json');
+// using external config data like: config.desktop
 var isProduction = false;
 if(plugins.util.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
@@ -57,7 +58,6 @@ var paths = {
     }
 };
 
-// using external config data like: config.desktop
 
 // Clean up the mess
 gulp.task('cleanUp', function() {

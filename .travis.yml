@@ -7,4 +7,4 @@ install:
   - gulp bower
   - npm install -g karma
 scripts:
-  - rsync -a ~/Extras/src/ ~/src/
+  - cp -r Extras/src src
