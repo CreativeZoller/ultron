@@ -9,7 +9,7 @@ module.exports = function(config) {
       'src/scripts/main.js',
       'src/tests/mySpec.js'
     ],
-    browsers : ['PhantomJS','Chrome'],
+    browsers : ['PhantomJS'],
     singleRun : true,
     reporters: ['progress'],
     colors: true,
