@@ -1,6 +1,7 @@
 # Ultron [![Build Status](https://travis-ci.org/CreativeZoller/ultron.svg?branch=master)](https://travis-ci.org/CreativeZoller/ultron)
 ## Synopsis
 ![Image of Ultron](http://goo.gl/JjKp7k)
+
 Ultron is a development dependency for future projects. It is a basic frame for front-end tasks, including some test functions.
 ### Motivation
 The purpose of this package is to make future work faster. In future projects there will be the ability to include this package and it will handle a lot of things instead of you. So you won't writing the corresponding codes again and again, wasting precious time with every project. Now with this package comes a lot of automated tasks such as compiles, and virtual server starts, hinting, unit tests and some other, partly pre-configured cool stuffs.
