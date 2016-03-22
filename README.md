@@ -1,6 +1,6 @@
-# Ultron
-***
+# Ultron [![Build Status](https://travis-ci.org/CreativeZoller/ultron.svg?branch=master)](https://travis-ci.org/CreativeZoller/ultron)
 ## Synopsis
+![Image of Ultron](http://goo.gl/JjKp7k)
 Ultron is a development dependency for future projects. It is a basic frame for front-end tasks, including some test functions.
 ### Motivation
 The purpose of this package is to make future work faster. In future projects there will be the ability to include this package and it will handle a lot of things instead of you. So you won't writing the corresponding codes again and again, wasting precious time with every project. Now with this package comes a lot of automated tasks such as compiles, and virtual server starts, hinting, unit tests and some other, partly pre-configured cool stuffs.
@@ -130,12 +130,14 @@ First of all, nearly every tasks have both development and production version, w
 `nightWatch` is for Jon Snows, how doesn't know anything. bus since you're not jon Snow, this script is for watching all the source files during the local virtual server running, and if there any changes the corresponding tasks will be fired.
 
 `serve` task has only one mode - development. Since I assume you will copy all the compiled files to your webserver or cloud host, running a local server only important during the development process.
+
+`npm test` is not a gulp task, it's an Npm task which is execuiting our karma test. It is easy ot modify and you also have the Mocha option instead of using Karma.
 ### Using as dependency
 You can use this repository as your base and advance it in your project after forking it, or you can use it as a submodule with the `git submodule add path_to_repo path_where_you_want_it` command. If you use by this way, you can run the `git submodule init` and `git submodule update` commands on occasion.
 
 Please be aware if you want to build really a large applcation based on multiple dependencies, you shouldn't use submodules, but an appropriate dependency-tool instead, like [Bower](http://bower.io/), [Component.io](http://component.io/) or [Composer](https://getcomposer.org/), etc.
 ## Testing
-Try run `npm test` to see if mocha is working correctly. Specific test cases need to be implemented depending on your choice (this repo comes with jasmin, mocha and karma included), also there is a css-redundancy test which must be modified to your needs (now it tests bootstrap official).
+Try run `npm test` to see if your Jasmine tests are working correctly. Specific test cases need to be implemented depending on your choice (this repo comes with jasmin, mocha and karma included), also there is a css-redundancy test which must be modified to your needs (now it tests bootstrap official).
 ## Contributing
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
