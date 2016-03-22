@@ -2,7 +2,7 @@
 // Generated on Sun Mar 20 2016 00:46:10 GMT+0100 (CET)
 
 module.exports = function(config) {
-  config.set({
+  var configuration = {
     basePath: '',
     frameworks: ['jasmine'],
     files: [
@@ -18,6 +18,16 @@ module.exports = function(config) {
     concurrency: Infinity,
     phantomjsLauncher: {
       exitOnResourceError: true
-    }
-  })
+    },
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
+  };
+  config.set(configuration);
+  if (process.env.TRAVIS) {
+    configuration.browsers = ['Chrome_travis_ci'];
+  }
 }
