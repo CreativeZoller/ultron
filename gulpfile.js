@@ -123,7 +123,6 @@ gulp.task('pngSprites', function() {
         style: paths.styles.src + 'sprites.scss',
         processor: 'sass',
     })
-    .pipe(bundleTimer)
         .on('error', function(err){
             new plugins.util.PluginError('png-sprite error', err, {showStack: true});
         })
@@ -192,6 +191,7 @@ gulp.task('imgMin', function() {
                 new plugins.util.PluginError('image minify error', err, {showStack: true});
             })
         .pipe(isProduction ? gulp.dest(paths.images.prod) : gulp.dest(paths.images.dev))
+        .pipe(bundleTimer)
         .pipe(plugins.notify({ message: "Image tasks were successful", onLast: true }));
 });
 gulp.task('imageBuild', function() {
