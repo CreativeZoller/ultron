@@ -22,3 +22,5 @@ dist
 todo.md
 secretConf.json
 index.html
+src/images/
+src/scss/

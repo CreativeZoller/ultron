@@ -19,6 +19,7 @@ if(plugins.util.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
     plugins.util.log('File', plugins.gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', plugins.util.colors.magenta(evt.type));
 };
+var bundleTimer = plugins.duration('bundle time');
 var basePaths = {
     root: './',
     src: 'src/',
@@ -122,6 +123,7 @@ gulp.task('pngSprites', function() {
         style: paths.styles.src + 'sprites.scss',
         processor: 'sass',
     })
+    .pipe(bundleTimer)
         .on('error', function(err){
             new plugins.util.PluginError('png-sprite error', err, {showStack: true});
         })
@@ -316,6 +318,7 @@ gulp.task('scriptBuild', function() {
 gulp.task('build', function() {
     runSequence('cleanUp', 'imageBuild', 'styleBuild', 'scriptBuild')
 });
+// watch tasks must be updated after gulp 4.0
 gulp.task('nightWatch', ['serve'], function() {
     gulp.watch(paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
         changeEvent(evt);
@@ -336,4 +339,3 @@ gulp.task('serve', function() {
         }
     });
 });
-

@@ -110,7 +110,7 @@ First of all, nearly every tasks have both development and production version, w
 
 `copySass` task collects your scss files from the style source folder, and put them into the temporary style folder.
 
-`sasscompile` compiles every scss files to css.
+`sassCompile` compiles every scss files to css.
 
 `preFix` task searches your compiled css files and add previously configured prefixes to them.
 
