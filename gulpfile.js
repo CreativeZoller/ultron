@@ -36,83 +36,101 @@ var basePaths = {
 };
 var paths = {
     images: {
-        src: basePaths.src + 'images/',
-        temp: basePaths.temp + 'images/',
-        dev: basePaths.dev + 'images/',
-        prod: basePaths.prod + 'images/'
+      src: basePaths.src + 'images/',
+      temp: basePaths.temp + 'images/',
+      dev: basePaths.dev + 'images/',
+      prod: basePaths.prod + 'images/'
     },
     scripts: {
-        src: basePaths.src + 'scripts/',
-        temp: basePaths.temp + 'scripts/',
-        dev: basePaths.dev + 'scripts/',
-        prod: basePaths.prod + 'scripts/'
+      src: basePaths.src + 'scripts/',
+      temp: basePaths.temp + 'scripts/',
+      dev: basePaths.dev + 'scripts/',
+      prod: basePaths.prod + 'scripts/'
     },
     styles: {
-        src: basePaths.src + 'scss/',
-        temp: basePaths.temp + 'scss/',
-        dev: basePaths.dev + 'styles/',
-        prod: basePaths.prod + 'styles/'
+      src: basePaths.src + 'scss/',
+      temp: basePaths.temp + 'scss/',
+      dev: basePaths.dev + 'styles/',
+      prod: basePaths.prod + 'styles/'
     },
     fonts: {
-        src: basePaths.bower + 'font-awesome/fonts/**.*',
-        prod: basePaths.src + 'fonts/'
+      src: basePaths.bower + 'font-awesome/fonts/**.*',
+      prod: basePaths.src + 'fonts/'
     }
 };
 
 
 // Clean up the mess
 gulp.task('cleanUp', function() {
-    del([basePaths.devFiles, basePaths.prodFiles, basePaths.tempFiles, basePaths.srcFonts, basePaths.srcMaps]);
+  del([basePaths.devFiles, basePaths.prodFiles, basePaths.tempFiles, basePaths.srcFonts, basePaths.srcMaps]);
 });
 
 // Init the bower install command
 gulp.task('bower', function() { 
-    return plugins.bower()
-         .pipe(gulp.dest(basePaths.bower)) 
-            .on('error', function(err){
-                new plugins.util.PluginError('bower package install error', err, {showStack: true});
-            })
-        .pipe(plugins.bower({ cmd: 'prune'}))
-            .on('error', function(err){
-                new plugins.util.PluginError('bower cleaning error', err, {showStack: true});
-            })
-        .pipe(plugins.notify({ message: "Bower installation was successful", onLast: true }));
+  return plugins.bower()
+    .pipe(gulp.dest(basePaths.bower)) 
+      .on('error', function(err){
+        new plugins.util.PluginError('bower package install error', err, {showStack: true});
+      })
+    .pipe(plugins.bower({ cmd: 'prune'}))
+      .on('error', function(err){
+        new plugins.util.PluginError('bower cleaning error', err, {showStack: true});
+      })
+    .pipe(plugins.notify({ message: "Bower installation was successful", onLast: true }));
 });
 
 // Handle FontAwesome
 gulp.task('fonts', function() { 
-    return gulp.src(paths.fonts.src) 
-        .pipe(gulp.dest(paths.fonts.prod))
-            .on('error', function(err){
-                new plugins.util.PluginError('copy font-awesome icon error', err, {showStack: true});
-            })
-        .pipe(plugins.notify({ message: "Fonts were copied", onLast: true })); 
+  return gulp.src(paths.fonts.src) 
+    .pipe(gulp.dest(paths.fonts.prod))
+      .on('error', function(err){
+        new plugins.util.PluginError('copy font-awesome icon error', err, {showStack: true});
+      })
+    .pipe(plugins.notify({ message: "Fonts were copied", onLast: true })); 
 });
 
 // For initial testing purposes only
 gulp.task('index', function() { 
-    return gulp.src('index.html') 
-        .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
+  return gulp.src('index.html') 
+    .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
 });
 // Check the compiled html files
 gulp.task('checkHtml', function() {
-    return gulp.src([basePaths.prod + '**/*.html', basePaths.dev + '**/*.html', basePaths.root + '/*.html'])
-        .pipe(isProduction ? plugins.util.noop() : plugins.htmlhint('.htmlhintrc'))
-            .on('error', function(err){
-                new plugins.util.PluginError('html linting error', err, {showStack: true});
-            })
-        .pipe(plugins.htmlhint.reporter("htmlhint-stylish")) ;
+  return gulp.src([basePaths.prod + '**/*.html', basePaths.dev + '**/*.html', basePaths.root + '/*.html'])
+    .pipe(isProduction ? plugins.util.noop() : plugins.htmlhint('.htmlhintrc'))
+      .on('error', function(err){
+        new plugins.util.PluginError('html linting error', err, {showStack: true});
+      })
+    .pipe(plugins.htmlhint.reporter("htmlhint-stylish")) ;
 });
 // Dinamycally replacing blocks in all compiled html
 gulp.task('replaceHtml', function () {
-    return gulp.src([basePaths.root + '*.html', basePaths.prod + '*.html', basePaths.dev + '*.html'])
-        .pipe(isProduction ?
-            plugins.inject(gulp.src([paths.scripts.prod + '*.js', paths.styles.prod + '*.css'], {read: true}), {relative: true}) :
-            plugins.inject(gulp.src([paths.scripts.dev + '*.js', paths.styles.dev + '*.css'], {read: true}), {relative: true}))
-            .on('error', function(err){
-                new plugins.util.PluginError('html injection error', err, {showStack: true});
-            })
-        .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
+  return gulp.src([basePaths.root + '*.html', basePaths.prod + '*.html', basePaths.dev + '*.html'])
+    .pipe(isProduction ?
+      plugins.inject(gulp.src([paths.scripts.prod + '*.js', paths.styles.prod + '*.css'], {read: true}), {relative: true}) :
+      plugins.inject(gulp.src([paths.scripts.dev + '*.js', paths.styles.dev + '*.css'], {read: true}), {relative: true}))
+        .on('error', function(err){
+          new plugins.util.PluginError('html injection error', err, {showStack: true});
+        })
+    .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
+});
+// Minify fully progressed html files
+gulp.task('minifyHtml', function() {
+  return gulp.src(isProduction ? basePaths.prod + '*.html' : basePaths.dev + '*.html')
+    .pipe(isProduction ? minifyHtml({
+      removeComments: true,
+			removeCommentsFromCDATA: true,
+			removeCDATASectionsFromCDATA: true,
+			collapseWhitespace: true,
+			collapseInlineTagWhitespace: true,
+			conservativeCollapse: true,
+			preserveLineBreaks: true,
+			removeScriptTypeAttributes: true
+		}) : plugins.util.noop())
+		.on('error', function(err){
+			new plugins.util.PluginError('html minify error', err, {showStack: true});
+		})
+		.pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
 });
 
 
@@ -122,6 +140,8 @@ gulp.task('pngSprites', function() {
         src: paths.images.src + '**/*.{png,jpg}',
         style: paths.styles.src + 'sprites.scss',
         processor: 'sass',
+        prefix: 'ult',
+        template: 'custom.hbs'
     })
         .on('error', function(err){
             new plugins.util.PluginError('png-sprite error', err, {showStack: true});
