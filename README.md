@@ -98,6 +98,8 @@ First of all, nearly every tasks have both development and production version, w
 
 `replaceHtml` is for dynamic injection of every necessary css and js files to the designated parts of our html files. It will change a lot in the near future, depending on the plans already lied down.
 
+`minifyHtml` is for minify the fully processed html files.
+
 `pngSprites` task creates png-spritesheet and corresponding stylesheet in scss format from every .png and .jpg files in the src/images folder.
 
 `retinaSprites` task creates retina-diplay ready spritesheet and corresponding stylesheet in scss format from every paired (there is a normal named, and a FILENAME-2x named version of it) .png files in the src/images/sprites2x folder.
@@ -110,7 +112,15 @@ First of all, nearly every tasks have both development and production version, w
 
 `copySass` task collects your scss files from the style source folder, and put them into the temporary style folder.
 
+`replaceSassPx` task finds and replaces everywhere the 'px' values with 0 value to unitless values in the temporary folder.
+
+`lintSass` task is for hinting your scss files through with predefinied rules.
+
 `sassCompile` compiles every scss files to css.
+
+`retinaSpriteUrl` replaces image urls in retinaSprites.scss.
+
+`svgSpriteUrl` replaces image urls in svg_sprites.scss.
 
 `preFix` task searches your compiled css files and add previously configured prefixes to them.
 

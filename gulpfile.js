@@ -77,8 +77,7 @@ gulp.task('bower', function() { 
       .on('error', function(err) {
           plugins.notify.onError({ title: 'bowerPrune error!', message: '<%= error.message %>', sound: 'Frog' })(err);
           this.emit('end');
-      })
-    .pipe(plugins.notify({ message: "Bower installation was successful", onLast: true }));
+      });
 });
 
 // Handle FontAwesome
@@ -88,8 +87,7 @@ gulp.task('fonts', function() { 
       .on('error', function(err) {
           plugins.notify.onError({ title: 'fontAwesome error!', message: '<%= error.message %>', sound: 'Frog' })(err);
           this.emit('end');
-      })
-    .pipe(plugins.notify({ message: "Fonts were copied", onLast: true })); 
+      });
 });
 
 // For initial testing purposes only
@@ -227,9 +225,7 @@ gulp.task('imgMin', function() {
           plugins.notify.onError({ title: 'imgMin error!', message: '<%= error.message %>', sound: 'Frog' })(err);
           this.emit('end');
       })
-    .pipe(isProduction ? gulp.dest(paths.images.prod) : gulp.dest(paths.images.dev))
-    .pipe(bundleTimer)
-    .pipe(plugins.notify({ message: "Image tasks were successful", onLast: true }));
+    .pipe(isProduction ? gulp.dest(paths.images.prod) : gulp.dest(paths.images.dev));
 });
 gulp.task('imageBuild', function() {
   runSequence(['pngSprites', 'retinaSprites', 'svgSprites'], 'copyImgs', 'imgMin', function() {
@@ -247,6 +243,20 @@ gulp.task('copySass', function() { 
           this.emit('end');
       });
 });
+gulp.task('replaceSassPx', function() {
+	return gulp.src(paths.styles.temp + '**/*.scss')
+		.pipe(plugins.replaceTask({
+			patterns: [{
+				match: /0px/g,
+				replacement: '0'
+			}]
+		}))
+      .on('error', function(err) {
+        plugins.notify.onError({ title: 'replaceSassPx error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+        this.emit('end');
+      })
+		.pipe(gulp.dest(paths.styles.temp));
+});
 gulp.task('lintSass', function() {
 	return gulp.src([paths.styles.temp + '**/*.scss', '!' + paths.styles.temp + 'includes/*.scss', '!' + paths.styles.temp + 'bootstrap.scss', '!' + paths.styles.temp + 'fontawesome.scss', '!' + paths.styles.temp + 'sprites.scss', '!' + paths.styles.temp + 'retinaSprites.scss', '!' + paths.styles.temp + 'svg_sprites.scss'])
     .on('error', function(err) {
@@ -256,14 +266,41 @@ gulp.task('lintSass', function() {
 		.pipe(plugins.scssLint({'config': 'lint.yml'}));
 });
 gulp.task('sassCompile', function() {
-  return gulp.src(paths.styles.temp + '*.scss')
-  //return gulp.src([paths.styles.temp + '*.scss', '!' + paths.styles.temp + 'retinaSprites.scss'])
+  return gulp.src([paths.styles.temp + '*.scss', '!' + paths.styles.temp + 'sprites.scss', '!' + paths.styles.temp + 'retinaSprites.scss'])
     .pipe(plugins.sass())
       .on('error', function(err) {
           plugins.notify.onError({ title: 'sassCompile error!', message: '<%= error.message %>', sound: 'Frog' })(err);
           this.emit('end');
       })
     .pipe(gulp.dest(paths.styles.temp));
+});
+gulp.task('retinaSpriteUrl', function() {
+  return gulp.src(paths.styles.temp + 'retinaSprites.css')
+    .pipe(plugins.replaceTask({
+			patterns: [{
+				match: /sprite/g,
+				replacement: '../images/sprite'
+			}]
+		}))
+    .on('error', function(err) {
+        plugins.notify.onError({ title: 'retinaSpriteUrl error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+        this.emit('end');
+    })
+		.pipe(gulp.dest(paths.styles.temp));
+});
+gulp.task('svgSpriteUrl', function() {
+  return gulp.src(paths.styles.temp + 'svg_sprites.scss')
+    .pipe(plugins.replaceTask({
+			patterns: [{
+				match: /.tmp/g,
+				replacement: '..'
+			}]
+		}))
+    .on('error', function(err) {
+        plugins.notify.onError({ title: 'svgSpriteUrl error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+        this.emit('end');
+    })
+		.pipe(gulp.dest(paths.styles.temp));
 });
 gulp.task('preFix', function () {
   return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + 'bootstrap.css', '!' + paths.styles.temp + '*.min.css'])
@@ -304,12 +341,10 @@ gulp.task('cssMin', function () {
       .on('error', function(err) {
           plugins.notify.onError({ title: 'cssMin error!', message: '<%= error.message %>', sound: 'Frog' })(err);
           this.emit('end');
-      })
-    .pipe(plugins.notify({ message: "CSS tasks were successful", onLast: true }));
+      });
 });
 gulp.task('styleBuild', function() {
-  runSequence('copySass', 'lintSass', 'sassCompile', 'preFix', 'cssLint', 'cssMin', function() {
-  //runSequence('copySass', 'replaceSassPx', 'lintSass', 'sassCompile', 'replaceSpriteUrl', 'preFix', '3rdPartyCss', 'cssLint', 'cssMin', function() {
+  runSequence('copySass', 'replaceSassPx', 'lintSass', 'sassCompile', 'retinaSpriteUrl', 'svgSpriteUrl', 'preFix', 'cssLint', 'cssMin', function() {
     reload({ stream: true })
   })
 });
@@ -362,8 +397,7 @@ gulp.task('scriptMin', function() {
       .on('error', function(err) {
           plugins.notify.onError({ title: 'scriptMin error!', message: '<%= error.message %>', sound: 'Frog' })(err);
           this.emit('end');
-      })
-    .pipe(plugins.notify({ message: "Script tasks were successful", onLast: true }));
+      });
 });
 gulp.task('scriptBuild', function() {
     runSequence('scriptLint', 'scriptFix', 'scriptModernizr', 'concatScripts', 'scriptMin', function() {
@@ -374,7 +408,7 @@ gulp.task('scriptBuild', function() {
 
 // Webserver tasks
 gulp.task('build', function() {
-    runSequence('cleanUp', 'imageBuild', 'styleBuild', 'scriptBuild')
+    runSequence(['cleanUp'], 'htmlBuild', 'imageBuild', 'styleBuild', 'scriptBuild');
 });
 // watch tasks must be updated after gulp 4.0
 gulp.task('nightWatch', ['serve'], function() {
