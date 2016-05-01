@@ -118,9 +118,9 @@ First of all, nearly every tasks have both development and production version, w
 
 `sassCompile` compiles every scss files to css.
 
-`retinaSpriteUrl` replaces image urls in retinaSprites.scss.
+`retinaSpriteUrl` replaces image urls in compiled retinaSprites file.
 
-`svgSpriteUrl` replaces image urls in svg_sprites.scss.
+`svgSpriteUrl` replaces image urls in compiled svg_sprites file.
 
 `preFix` task searches your compiled css files and add previously configured prefixes to them.
 
