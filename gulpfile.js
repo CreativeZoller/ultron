@@ -161,9 +161,9 @@ gulp.task('retinaSprites', function() {
   var spriteData = gulp.src(paths.images.src + 'sprites2x/*.png')
     .pipe(plugins.spritesmith({
       algorithm: 'binary-tree',
-      retinaSrcFilter: paths.images.src + 'sprites2x/*-2x.png',
+      retinaSrcFilter: paths.images.src + 'sprites2x/*@2x.png',
       imgName: 'spritesheet.png',
-      retinaImgName: 'spritesheet-2x.png',
+      retinaImgName: 'retinaSprites.png',
       cssName: 'retinaSprites.scss'
     }))
       .on('error', function(err) {
@@ -266,7 +266,7 @@ gulp.task('lintSass', function() {
 		.pipe(plugins.scssLint({'config': 'lint.yml'}));
 });
 gulp.task('sassCompile', function() {
-  return gulp.src([paths.styles.temp + '*.scss', '!' + paths.styles.temp + 'sprites.scss', '!' + paths.styles.temp + 'retinaSprites.scss'])
+  return gulp.src([paths.styles.temp + '*.scss', '!' + paths.styles.temp + 'sprites.scss', '!' + paths.styles.temp + 'retinaSprites.scss', '!' + paths.styles.temp + 'svg_sprites.scss'])
     .pipe(plugins.sass())
       .on('error', function(err) {
           plugins.notify.onError({ title: 'sassCompile error!', message: '<%= error.message %>', sound: 'Frog' })(err);
@@ -289,11 +289,11 @@ gulp.task('retinaSpriteUrl', function() {
 		.pipe(gulp.dest(paths.styles.temp));
 });
 gulp.task('svgSpriteUrl', function() {
-  return gulp.src(paths.styles.temp + 'svg_sprites.scss')
+  return gulp.src(paths.styles.temp + 'main.css')
     .pipe(plugins.replaceTask({
 			patterns: [{
-				match: /.tmp/g,
-				replacement: '..'
+				match: /tmp/g,
+				replacement: '.'
 			}]
 		}))
     .on('error', function(err) {
