@@ -19,6 +19,8 @@ After forking this to your project root, simply type
 If you have some other packages installed, try `npm prune` to uninstall not used and/or unnecessary modules.
 
 I also suggest to configure the included [BackstopJS](https://github.com/garris/BackstopJS) module also, which checks the official Bootstrap by default.
+
+// TODO: install.sh with chmod 777 ./install.sh
 ### Dependencies
 The package don't have any dependencies. But I recommend using of Gulp v3.9.1 or newer.
 

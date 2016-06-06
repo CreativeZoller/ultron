@@ -104,6 +104,15 @@ gulp.task('index', function() { 
     .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
 });
 
+// Dynamic todo.md creation
+gulp.task('todo-reporters', function() {
+    return gulp.src(['**/*.html', '**/*.sh', '**/*.js', '**/*.scss', '**/*.css', '!node_modules/**/*', '!bower_components/**/*', '!backstop_data/**/*', '!src/images/**/*'])
+        .pipe(plugins.todo())
+        .pipe(gulp.dest('./'))
+        .pipe(plugins.todo.reporter('json', {fileName: 'todo.json'}))
+        .pipe(gulp.dest('./'))
+});
+
 // Handle all html files
 gulp.task('checkHtml', function() {
   return gulp.src([basePaths.prod + '**/*.html', basePaths.dev + '**/*.html', basePaths.root + '/*.html'])
