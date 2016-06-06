@@ -19,7 +19,9 @@ backstop_data
 app
 devApp
 dist
-todo.md
+_todo.md
+TODO.md
+TODO.json
 secretConf.json
 src/images/
 src/scss/

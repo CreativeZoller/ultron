@@ -7,19 +7,25 @@ var plugins = require("gulp-load-plugins")({
     pattern: ['gulp-*', 'gulp.*'],
     replaceString: /\bgulp[\-.]/
 });
+//var config = require('./secretConf.json');
+// TODO: using external config data for path and task configs like: config.desktop from .secretConf.json
+var fs = require('fs');
 var del = require('del');
 var sprity = require('sprity');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
-//var config = require('./secretConf.json');
-// using external config data like: config.desktop
+// TODO: phantomjs testing fails because lwip
+// TODO: checking out devDependencies for unnecessary packages to remove
+// TODO: checking for packages which could be replaced by a more advanced package - for task anti-redundandcy
+
 var isProduction = false;
 if(plugins.util.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
     plugins.util.log('File', plugins.gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', plugins.util.colors.magenta(evt.type));
 };
 var bundleTimer = plugins.duration('bundle time');
+
 var basePaths = {
     root: './',
     src: 'src/',
@@ -59,6 +65,8 @@ var paths = {
     }
 };
 
+// TODO: add todo autogenerate task
+// TODO: replace all style-related tasks with postcss, postcss-cssnext, postcss-sorting, postcss-short, postcss-font-magician, postcss-sprites, postcss-easysprites, postcss-assets, postcss-write-svg, stylelint, stylefmt, doiuse (optional can i use), css-colorguard (optional), cssnano, postcss-scss (autoprefixer and scss-linter in one), postcss-safe-parser
 
 // Clean up the mess
 gulp.task('cleanUp', function() {
@@ -136,8 +144,13 @@ gulp.task('minifyHtml', function() {
 		.pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
 });
 gulp.task('htmlBuild', function() {
-  runSequence(['index'], 'checkHtml', 'replaceHtml', 'minifyHtml', function() {
-    reload({ stream: true })
+  runSequence(
+    ['index'],
+    'checkHtml',
+    'replaceHtml',
+    'minifyHtml',
+    function() {
+      reload({ stream: true })
   })
 });
 
@@ -228,8 +241,14 @@ gulp.task('imgMin', function() {
     .pipe(isProduction ? gulp.dest(paths.images.prod) : gulp.dest(paths.images.dev));
 });
 gulp.task('imageBuild', function() {
-  runSequence(['pngSprites', 'retinaSprites', 'svgSprites'], 'copyImgs', 'imgMin', function() {
-    reload({ stream: true })
+  runSequence([
+    'pngSprites',
+    'retinaSprites',
+    'svgSprites'],
+    'copyImgs',
+    'imgMin',
+    function() {
+      reload({ stream: true })
   })
 });
 
@@ -344,8 +363,18 @@ gulp.task('cssMin', function () {
       });
 });
 gulp.task('styleBuild', function() {
-  runSequence('copySass', 'replaceSassPx', 'lintSass', 'sassCompile', 'retinaSpriteUrl', 'svgSpriteUrl', 'preFix', 'cssLint', 'cssMin', function() {
-    reload({ stream: true })
+  runSequence(
+    'copySass',
+    'replaceSassPx',
+    'lintSass',
+    'sassCompile',
+    'retinaSpriteUrl',
+    'svgSpriteUrl',
+    'preFix',
+    'cssLint',
+    'cssMin',
+    function() {
+      reload({ stream: true })
   })
 });
 
@@ -400,7 +429,13 @@ gulp.task('scriptMin', function() {
       });
 });
 gulp.task('scriptBuild', function() {
-    runSequence('scriptLint', 'scriptFix', 'scriptModernizr', 'concatScripts', 'scriptMin', function() {
+    runSequence(
+      'scriptLint',
+      'scriptFix',
+      'scriptModernizr',
+      'concatScripts',
+      'scriptMin',
+      function() {
         reload({ stream: true })
     })
 });
@@ -408,9 +443,15 @@ gulp.task('scriptBuild', function() {
 
 // Webserver tasks
 gulp.task('build', function() {
-    runSequence(['cleanUp'], 'htmlBuild', 'imageBuild', 'styleBuild', 'scriptBuild');
+    runSequence(
+      ['cleanUp'],
+      'htmlBuild',
+      'imageBuild',
+      'styleBuild',
+      'scriptBuild'
+    );
 });
-// watch tasks must be updated after gulp 4.0
+// TODO: watch tasks must be updated after gulp 4.0
 gulp.task('nightWatch', ['serve'], function() {
     gulp.watch(paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
         changeEvent(evt);
