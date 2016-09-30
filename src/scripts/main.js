@@ -12,7 +12,7 @@ var My = {
 };
 function runRight() {
   var currentDate = new Date().toLocaleTimeString();
-  console.info('I am ready @' + currentDate);
+  console.log('I am ready @' + currentDate);
 }
 if (document.readyState !== 'loading') {
   runRight();
@@ -22,6 +22,7 @@ if (document.readyState !== 'loading') {
   document.attachEvent('onreadystatechange', function () {
     if (document.readyState === 'complete') {
       runRight();
+      //console.info('site is finally ready');
     }
   });
 }

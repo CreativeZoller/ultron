@@ -1,278 +1,377 @@
-"use strict";
-var gulp = require('gulp');
-var plugins = require("gulp-load-plugins")({
-    DEBUG: false,
-    scope: 'devDependencies',
-    camelize: true,
-    pattern: ['gulp-*', 'gulp.*'],
-    replaceString: /\bgulp[\-.]/
-});
-//var config = require('./secretConf.json');
-// TODO: using external config data for path and task configs like: config.desktop from .secretConf.json
-var fs = require('fs');
+// *************************************
+//
+//   Gulpfile
+//
+// *************************************
+//
+// Available tasks w/ gulp naming tag
+//   `build`
+//   `buildAll`
+//   `buildExtra`
+//   `buildReports`
+//   `htmlBuild`
+//   `imageBuild`
+//   `nightWatch`
+//   `serve`
+//   `scriptBuild`
+//   `styleBuild`
+//   `clear:all`
+//   `clear:tempImages`
+//   `clear:tempStyles`
+//   `compile:sass`
+//   `concat:js`
+//   `copy:fonts`
+//   `copy:images`
+//   `copy:index`
+//   `copy:sass`
+//   `fix:js`
+//   `fix:css:retina`
+//   `fix:css:sprites`
+//   `fix:sass`
+//   `gen:cssStats`
+//   `gen:modernizr`
+//   `gen:todo`
+//   `inject:html`
+//   `lint:html`
+//   `lint:css`
+//   `lint:js`
+//   `minify:css`
+//   `minify:html`
+//   `minify:images`
+//   `minify:js`
+//   `prefix:css`
+//   `sprites:png`
+//   `sprites:retina`
+//   `sprites:svg`
+//
+// *************************************
+'use strict';
+var gulp    = require('gulp'),
+    plugins = require('gulp-load-plugins')({
+        DEBUG: false,
+        scope: 'devDependencies',
+        camelize: true,
+        pattern: ['gulp-*', 'gulp.*'],
+        replaceString: /\bgulp[\-.]/
+    }),
+    taskPath = './gulptasks/',
+    config = require('./gulptasks/config'),
+    taskList = require('fs').readdirSync(taskPath);
+
+function getTask(task) {
+    return require(taskPath + task)(gulp, config, plugins);
+}
+
+// TODO proper testings: karma for 2e2 and jasmine for coverage like this (karma + phantomjs in jasmine)
+// > http://syropia.net/journal/javascript-testing-with-jasmine-and-gulp-redux
+// TODO: add mocha+jasmine testing with coverage report  > https://github.com/dylanb/gulp-coverage
+// TODO: new backstop testing
+
+// TODO: make travis use install.sh with chmod 777
+// TODO: change to new commiting, also use it from now: check my emails by esailor
+
+
+// TODO: egyenlore kiszedni, kesobb fixaltan feldarabolni
+//taskList.forEach(getTask);
+//gulp.task('cleanTasks', getTask('clean'));
+//gulp.task('scriptTasks', getTask('scripts-all'));
+// -------------------------------------
+//   Modules > taskfiles
+// -------------------------------------
+//
+// gulp              : The streaming build system
+// gulp-autoprefixer : Prefix CSS
+// gulp-coffee       : Compile CoffeeScript files
+// gulp-coffeelint   : Lint your CoffeeScript
+// gulp-concat       : Concatenate files
+// gulp-csscss       : CSS redundancy analyzer
+// gulp-jshint       : JavaScript code quality tool
+// gulp-load-plugins : Automatically load Gulp plugins
+// gulp-minify-css   : Minify CSS
+// gulp-parker       : Stylesheet analysis tool
+// gulp-plumber      : Prevent pipe breaking from errors
+// gulp-rename       : Rename files
+// gulp-sass         : Compile Sass
+// gulp-svgmin       : Minify SVG files
+// gulp-svgstore     : Combine SVG files into one
+// gulp-uglify       : Minify JavaScript with UglifyJS
+// gulp-util         : Utility functions
+// gulp-watch        : Watch stream
+// run-sequence      : Run a series of dependent Gulp tasks in order
+//
+// -------------------------------------
 var del = require('del');
-var sprity = require('sprity');
+var fs = require('fs');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
-// TODO: phantomjs testing fails because lwip
-// TODO: checking out devDependencies for unnecessary packages to remove
-// TODO: checking for packages which could be replaced by a more advanced package - for task anti-redundandcy
+var through = require('through2');
+var sprity = require('sprity');
 
 var isProduction = false;
 if(plugins.util.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
-    plugins.util.log('File', plugins.gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', plugins.util.colors.magenta(evt.type));
-};
-var bundleTimer = plugins.duration('bundle time');
-
-var basePaths = {
-    root: './',
-    src: 'src/',
-    prod: 'app/',
-    dev: 'devApp/',
-    temp: '.tmp/',
-    bower: 'bower_components/',
-    test: 'src/tests/',
-    devFiles: 'devApp/**/*',
-    prodFiles: 'app/**/*',
-    tempFiles: '.tmp/**/*',
-    srcFonts: 'src/scss/fonts/*',
-    srcMaps: 'src/**/*.map'
-};
-var paths = {
-    images: {
-      src: basePaths.src + 'images/',
-      temp: basePaths.temp + 'images/',
-      dev: basePaths.dev + 'images/',
-      prod: basePaths.prod + 'images/'
-    },
-    scripts: {
-      src: basePaths.src + 'scripts/',
-      temp: basePaths.temp + 'scripts/',
-      dev: basePaths.dev + 'scripts/',
-      prod: basePaths.prod + 'scripts/'
-    },
-    styles: {
-      src: basePaths.src + 'scss/',
-      temp: basePaths.temp + 'scss/',
-      dev: basePaths.dev + 'styles/',
-      prod: basePaths.prod + 'styles/'
-    },
-    fonts: {
-      src: basePaths.bower + 'font-awesome/fonts/**.*',
-      prod: basePaths.src + 'fonts/'
-    }
+    plugins.util.log('File', evt.path.replace(new RegExp('/.*(?=/' + config.src.basePaths.src + ')/'), ''), 'was', evt.type);
 };
 
-// TODO: add todo autogenerate task
-// TODO: replace all style-related tasks with postcss, postcss-cssnext, postcss-sorting, postcss-short, postcss-font-magician, postcss-sprites, postcss-easysprites, postcss-assets, postcss-write-svg, stylelint, stylefmt, doiuse (optional can i use), css-colorguard (optional), cssnano, postcss-scss (autoprefixer and scss-linter in one), postcss-safe-parser
-
-// Clean up the mess
-gulp.task('cleanUp', function() {
-  del([basePaths.devFiles, basePaths.prodFiles, basePaths.tempFiles, basePaths.srcFonts, basePaths.srcMaps]);
+// -------------------------------------
+//   Task: Clear: Everything
+// -------------------------------------
+gulp.task('clear:all', function () {
+  return del(config.src.srcCleanUp());
 });
 
-// Init the bower install command
-gulp.task('bower', function() { 
-  return plugins.bower()
-    .pipe(gulp.dest(basePaths.bower)) 
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'bowerInstall error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(plugins.bower({ cmd: 'prune'}))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'bowerPrune error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      });
-});
 
-// Handle FontAwesome
-gulp.task('fonts', function() { 
-  return gulp.src(paths.fonts.src) 
-    .pipe(gulp.dest(paths.fonts.prod))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'fontAwesome error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      });
-});
 
-// For initial testing purposes only
-gulp.task('index', function() { 
-  return gulp.src('index.html') 
-    .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev)); 
-});
-
-// Dynamic todo.md creation
-gulp.task('todo-reporters', function() {
-    return gulp.src(['**/*.html', '**/*.sh', '**/*.js', '**/*.scss', '**/*.css', '!node_modules/**/*', '!bower_components/**/*', '!backstop_data/**/*', '!src/images/**/*'])
+// -------------------------------------
+//   Task: Generate: TODO file
+// -------------------------------------
+gulp.task('gen:todo', function() {
+    return gulp.src(config.src.srcTodo())
         .pipe(plugins.todo())
-        .pipe(gulp.dest('./'))
+        .pipe(gulp.dest(config.src.destTodo))
         .pipe(plugins.todo.reporter('json', {fileName: 'todo.json'}))
-        .pipe(gulp.dest('./'))
+        .pipe(gulp.dest(config.src.destTodo))
 });
-
-// Handle all html files
-gulp.task('checkHtml', function() {
-  return gulp.src([basePaths.prod + '**/*.html', basePaths.dev + '**/*.html', basePaths.root + '/*.html'])
+// -------------------------------------
+//   Task: Copy: FontAwesome icons
+// -------------------------------------
+gulp.task('copy:fonts', function() { 
+  return gulp.src(config.src.paths.fonts.src) 
+    .pipe(gulp.dest(config.src.paths.fonts.temp));
+});
+gulp.task('copy:fontsFinal', function() { 
+  return gulp.src(config.src.paths.fonts.tmp2) 
+    .pipe(gulp.dest(config.src.paths.fonts.prod));
+});
+// -------------------------------------
+//   Task: Copy: Test html file
+// -------------------------------------
+gulp.task('copy:index', function() { 
+  return gulp.src('index.html') 
+  .pipe(gulp.dest(config.src.basePaths.prod)); 
+});
+// -------------------------------------
+//   Task: Lint: Html files
+// -------------------------------------
+gulp.task('lint:html', function() {
+  return gulp.src([config.src.basePaths.prod + '**/*.html', config.src.basePaths.root + '/*.html'])
     .pipe(isProduction ? plugins.util.noop() : plugins.htmlhint('.htmlhintrc'))
       .on('error', function(err) {
-          plugins.notify.onError({ title: 'htmlLinting error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
       })
     .pipe(plugins.htmlhint.reporter("htmlhint-stylish")) ;
 });
-gulp.task('replaceHtml', function () {
-  return gulp.src([basePaths.root + '*.html', basePaths.prod + '*.html', basePaths.dev + '*.html'])
-    .pipe(isProduction ?
-      plugins.inject(gulp.src([paths.scripts.prod + '*.js', paths.styles.prod + '*.css'], {read: true}), {relative: true}) :
-      plugins.inject(gulp.src([paths.scripts.dev + '*.js', paths.styles.dev + '*.css'], {read: true}), {relative: true}))
-        .on('error', function(err) {
-            plugins.notify.onError({ title: 'htmlInjection error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-            this.emit('end');
-        })
-    .pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
-});
-gulp.task('minifyHtml', function() {
-  return gulp.src(isProduction ? basePaths.prod + '*.html' : basePaths.dev + '*.html')
-    .pipe(isProduction ? minifyHtml({
-      removeComments: true,
-			removeCommentsFromCDATA: true,
-			removeCDATASectionsFromCDATA: true,
-			collapseWhitespace: true,
-			collapseInlineTagWhitespace: true,
-			conservativeCollapse: true,
-			preserveLineBreaks: true,
-			removeScriptTypeAttributes: true
-		}) : plugins.util.noop())
-    .on('error', function(err) {
-        plugins.notify.onError({ title: 'htmlMinify error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+// -------------------------------------
+//   Task: Inject: to Html files
+// -------------------------------------
+gulp.task('inject:html', function() {
+  return gulp.src([config.src.basePaths.root + '*.html', config.src.basePaths.prod + '*.html'])
+    .pipe(plugins.inject(gulp.src([config.src.paths.scripts.prod + '*.js', config.src.paths.styles.prod + '*.css'], {read: true}), {relative: true}))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
-    })
-		.pipe(isProduction ? gulp.dest(basePaths.prod) : gulp.dest(basePaths.dev));
+      })
+    .pipe(gulp.dest(config.src.basePaths.prod));
 });
-gulp.task('htmlBuild', function() {
-  runSequence(
-    ['index'],
-    'checkHtml',
-    'replaceHtml',
-    'minifyHtml',
-    function() {
-      reload({ stream: true })
-  })
-});
-
-
-// Handle all images
-gulp.task('pngSprites', function() {
-  return sprity.src({
-    src: paths.images.src + '*.{png,jpg}',
-    style: paths.styles.src + 'sprites.scss',
-    processor: 'sass',
-    prefix: 'ult',
-    template: 'custom.hbs'
-  })
-    .on('error', function(err) {
-        plugins.notify.onError({ title: 'pngSprite error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+// -------------------------------------
+//   Task: Minify: Html files
+// -------------------------------------
+gulp.task('minify:html', function() {
+  return gulp.src(config.src.basePaths.prod + '*.html')
+    .pipe(isProduction ? plugins.htmlmin(config.options.htmlMin) : plugins.util.noop())
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
-    })
-  .pipe(plugins.if('*.png', gulp.dest(paths.images.temp), gulp.dest(paths.styles.temp)));
-});
-gulp.task('retinaSprites', function() {
-  var spriteData = gulp.src(paths.images.src + 'sprites2x/*.png')
-    .pipe(plugins.spritesmith({
-      algorithm: 'binary-tree',
-      retinaSrcFilter: paths.images.src + 'sprites2x/*@2x.png',
-      imgName: 'spritesheet.png',
-      retinaImgName: 'retinaSprites.png',
-      cssName: 'retinaSprites.scss'
-    }))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'retinaSprites error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
       })
-  spriteData.img.pipe(gulp.dest(paths.images.temp));
-  spriteData.css.pipe(gulp.dest(paths.styles.temp));
+		.pipe(gulp.dest(config.src.basePaths.prod));
 });
-gulp.task('svgSprites', function() {
-  var config = {
-    dest : basePaths.root,
-    shape : {
-      dimension : {
-        maxWidth: 128,
-        maxHeight: 128
-      },
-      spacing: {
-        padding: 10
-      }
-    },
-    mode : {
-      css : {
-        dest : basePaths.root,
-        sprite : paths.images.temp + 'sprites.svg',
-        render : {
-          scss : {
-            dest : paths.styles.temp + 'svg_sprites.scss'
-          }
-        }
-      }
-    }
-  };
-  return gulp.src(paths.images.src + '**/*.svg')
-    .pipe(plugins.svgSprite(config))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'svgSprite error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(gulp.dest('.'));
-});
-gulp.task('copyImgs', function() { 
-  return gulp.src(paths.images.src + '*.{gif,jpg,png,svg}') 
-    .pipe(gulp.dest(paths.images.temp))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'copyImgs error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      }); 
-});
-gulp.task('imgMin', function() {
-  return gulp.src(paths.images.temp + '*.{gif,jpg,png,svg}')
-    .pipe(isProduction ? plugins.imagemin({
-      progressive: true,
-      interlaced: true,
-      optimizationLevel: 7,
-      use: [pngQuant()]
-    }) : plugins.util.noop())
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'imgMin error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(isProduction ? gulp.dest(paths.images.prod) : gulp.dest(paths.images.dev));
-});
-gulp.task('imageBuild', function() {
-  runSequence([
-    'pngSprites',
-    'retinaSprites',
-    'svgSprites'],
-    'copyImgs',
-    'imgMin',
-    function() {
-      reload({ stream: true })
-  })
+// -------------------------------------
+//   MultiTask: Html tasklist
+// -------------------------------------
+gulp.task('htmlBuild', function(done) {
+  runSequence('lint:html', 'inject:html', 'minify:html', function() {
+    done();
+  });
 });
 
 
-// Handle stylesheets
-gulp.task('copySass', function() { 
-  return gulp.src(paths.styles.src + '**/*.scss') 
-    .pipe(gulp.dest(paths.styles.temp))
+
+// -------------------------------------
+//   Task: Lint: JavaScript files
+// -------------------------------------
+gulp.task('lint:js', function() {
+  return gulp.src(config.src.srcJSLint)
+    .pipe(plugins.changed(config.src.paths.scripts.src))
+    .pipe(isProduction ? plugins.util.noop() : plugins.jshint('.jshintrc'))
       .on('error', function(err) {
-          plugins.notify.onError({ title: 'copySass error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+    .pipe(plugins.jshint.reporter('jshint-stylish'));
+});
+// -------------------------------------
+//   Task: Fix: JavaScript files
+// -------------------------------------
+gulp.task('fix:js', function() {
+  return gulp.src(config.src.srcJSLint)
+    .pipe(plugins.changed(config.src.paths.scripts.src))
+    .pipe(isProduction ? plugins.util.noop() : plugins.fixmyjs())
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+    .pipe(gulp.dest(config.src.paths.scripts.src));
+});
+// -------------------------------------
+//   Task: Generate: Modernizr Scripts
+// -------------------------------------
+gulp.task('gen:modernizr', function() {
+  return gulp.src(config.src.srcJSLint)
+    .pipe(plugins.modernizr(config.options.modernizr))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+    .pipe(gulp.dest(config.src.paths.scripts.prod))
+});
+// -------------------------------------
+//   Task: Concatenate: JavaScript files
+// -------------------------------------
+gulp.task('concat:js', function() {
+  return gulp.src(config.src.srcJSLint)
+    .pipe(plugins.concat(config.src.ccJSName))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+    .pipe(gulp.dest(config.src.paths.scripts.temp));
+});
+// -------------------------------------
+//   Task: Minify: JavaScript files
+// -------------------------------------
+gulp.task('minify:js', function() {
+  return gulp.src(config.src.paths.scripts.temp + config.src.ccJSName)
+    .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
+    .pipe(plugins.rename('main.min.js'))
+    .pipe(isProduction ? plugins.uglify() : plugins.util.noop())
+    .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
+    .pipe(gulp.dest(config.src.paths.scripts.prod))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
       });
 });
-gulp.task('replaceSassPx', function() {
-	return gulp.src(paths.styles.temp + '**/*.scss')
+// -------------------------------------
+//   MultiTask: Script tasklist
+// -------------------------------------
+gulp.task('scriptBuild', function(done) {
+  runSequence('lint:js', 'fix:js', 'gen:modernizr', 'concat:js', 'minify:js', function() {
+    done();
+  });
+});
+
+
+// -------------------------------------
+//   Task: Spritesheet: Png, Jpg files
+// -------------------------------------
+gulp.task('sprites:png', function() {
+    var spritePngs = gulp.src(config.src.paths.images.src + '*.{png,jpg}')
+      .pipe(plugins.spritesmith({
+        algorithm: 'binary-tree',
+        cssFormat: 'sass',
+        imgName: 'sprites.png',
+        cssName: 'sprites.scss',
+      }))
+        .on('error', function(err) {
+          plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+          this.emit('end');
+        })
+    spritePngs.img.pipe(gulp.dest(config.src.paths.images.temp));
+    spritePngs.css.pipe(gulp.dest(config.src.paths.styles.temp));
+});
+
+// -------------------------------------
+//   Task: Spritesheet: Retina files
+// -------------------------------------
+gulp.task('sprites:retina', function() {
+  var spriteData = gulp.src(config.src.srcRetineSprites)
+    .pipe(plugins.spritesmith({
+      algorithm: 'binary-tree',
+      retinaSrcFilter: config.src.srcBRetinaSprites,
+      imgName: config.src.nameRetinaImg,
+      retinaImgName: config.src.nameBRetinaImg,
+      cssName: config.src.nameRetinaCss
+    }))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+  spriteData.img.pipe(gulp.dest(config.src.destRetinaImg));
+  spriteData.css.pipe(gulp.dest(config.src.destRetinaCss));
+});
+// -------------------------------------
+//   Task: Spritesheet: SVG files
+// -------------------------------------
+gulp.task('sprites:svg', function() {
+  return gulp.src(config.src.srcSvgSprites)
+    .pipe(plugins.svgSprite(config.options.svgSprite))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+    .pipe(gulp.dest(config.src.destSvgSprites));
+});
+// -------------------------------------
+//   Task: Copy: Image files
+// -------------------------------------
+gulp.task('copy:images', function() { 
+  return gulp.src(config.src.srcImages) 
+    .pipe(gulp.dest(config.src.destImages))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      });
+});
+// -------------------------------------
+//   Task: Minify: Image files
+// -------------------------------------
+gulp.task('minify:images', function() {
+  return gulp.src(config.src.srcMinifyImf)
+    .pipe(isProduction ? plugins.imagemin(config.options.imageMin) : plugins.util.noop())
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      })
+    .pipe(gulp.dest(config.src.paths.images.prod));
+});
+// -------------------------------------
+//   MultiTask: Image tasklist
+// -------------------------------------
+gulp.task('imageBuild', function(done) {
+  runSequence(['sprites:png', 'sprites:retina', 'sprites:svg'], 'copy:images', 'minify:images', function() {
+    done();
+  });
+});
+
+
+// -------------------------------------
+//   Task: Copy: SCSS files
+// -------------------------------------
+gulp.task('copy:sass', function() { 
+  return gulp.src(config.src.srcSassCopy) 
+    .pipe(gulp.dest(config.src.destSassCopy))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      });
+});
+// -------------------------------------
+//   Task: Fix: SCSS files
+// -------------------------------------
+gulp.task('fix:sass', function() {
+	return gulp.src(config.src.srcSassFix)
 		.pipe(plugins.replaceTask({
 			patterns: [{
 				match: /0px/g,
@@ -280,204 +379,173 @@ gulp.task('replaceSassPx', function() {
 			}]
 		}))
       .on('error', function(err) {
-        plugins.notify.onError({ title: 'replaceSassPx error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-		.pipe(gulp.dest(paths.styles.temp));
+		.pipe(gulp.dest(config.src.destSassFix));
 });
-gulp.task('lintSass', function() {
-	return gulp.src([paths.styles.temp + '**/*.scss', '!' + paths.styles.temp + 'includes/*.scss', '!' + paths.styles.temp + 'bootstrap.scss', '!' + paths.styles.temp + 'fontawesome.scss', '!' + paths.styles.temp + 'sprites.scss', '!' + paths.styles.temp + 'retinaSprites.scss', '!' + paths.styles.temp + 'svg_sprites.scss'])
-    .on('error', function(err) {
-        plugins.notify.onError({ title: 'lintSass error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+// -------------------------------------
+//   Task: Compile: SCSS files
+// -------------------------------------
+gulp.task('compile:sass', function() {
+  return gulp.src(config.src.srcSassComp())
+    .pipe(plugins.sass.sync())
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
-    })
-		.pipe(plugins.scssLint({'config': 'lint.yml'}));
-});
-gulp.task('sassCompile', function() {
-  return gulp.src([paths.styles.temp + '*.scss', '!' + paths.styles.temp + 'sprites.scss', '!' + paths.styles.temp + 'retinaSprites.scss', '!' + paths.styles.temp + 'svg_sprites.scss'])
-    .pipe(plugins.sass())
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'sassCompile error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
       })
-    .pipe(gulp.dest(paths.styles.temp));
+    .pipe(gulp.dest(config.src.destSassComp));
 });
-gulp.task('retinaSpriteUrl', function() {
-  return gulp.src(paths.styles.temp + 'retinaSprites.css')
-    .pipe(plugins.replaceTask({
-			patterns: [{
-				match: /sprite/g,
-				replacement: '../images/sprite'
-			}]
-		}))
-    .on('error', function(err) {
-        plugins.notify.onError({ title: 'retinaSpriteUrl error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+// -------------------------------------
+//   Task: Fix: CSS files, Part 1
+// -------------------------------------
+gulp.task('fix:css:retina', function() {
+  return gulp.src(config.src.srcCssRetina)
+    .pipe(plugins.replaceTask(config.options.ssRetina))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
-    })
-		.pipe(gulp.dest(paths.styles.temp));
+      })
+		.pipe(gulp.dest(config.src.destCssRetina));
 });
-gulp.task('svgSpriteUrl', function() {
-  return gulp.src(paths.styles.temp + 'main.css')
-    .pipe(plugins.replaceTask({
-			patterns: [{
-				match: /tmp/g,
-				replacement: '.'
-			}]
-		}))
-    .on('error', function(err) {
-        plugins.notify.onError({ title: 'svgSpriteUrl error!', message: '<%= error.message %>', sound: 'Frog' })(err);
+// -------------------------------------
+//   Task: Fix: CSS files, Part 2
+// -------------------------------------
+gulp.task('fix:css:sprites', function() {
+  return gulp.src(config.src.srcCssSprites)
+    .pipe(plugins.replaceTask(config.options.cssSprites))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
-    })
-		.pipe(gulp.dest(paths.styles.temp));
-});
-gulp.task('preFix', function () {
-  return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + 'bootstrap.css', '!' + paths.styles.temp + '*.min.css'])
-    .pipe(plugins.autoprefixer({
-      browsers: ['> 10%', 'last 2 Chrome versions', 'last 2 Firefox versions', 'last 2 Opera versions', 'last 2 Safari versions', 'not ie <= 10'],
-      cascade: false
-    }))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'preFix error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
       })
-    .pipe(plugins.csscomb({
-      config: 'csscomb.json'
-    }))
-    .pipe(isProduction ? plugins.base64() : plugins.util.noop())
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'base64 error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(gulp.dest(paths.styles.temp));
+		.pipe(gulp.dest(config.src.destCssSprites));
 });
-gulp.task('cssLint', function() {
-  return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + '*.min.css', '!' + paths.styles.temp + 'bootstrap.css','!' + paths.styles.temp + 'fontawesome.css'])
-    .pipe(isProduction ? plugins.util.noop() : plugins.csslint('csslintrc.json'))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'cssLint error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(isProduction ? plugins.csslint.reporter('junit-xml') : plugins.csslint.reporter('compact'));
+// -------------------------------------
+//   Task: Fix and Reorder: CSS files
+// -------------------------------------
+gulp.task('prefix:css', function() {
+    var autoprefixer = require('autoprefixer');
+    return gulp.src(config.src.srcCssPrefix())
+        .pipe(plugins.postcss([
+          autoprefixer(config.options.autoprefBrowsers)
+        ]))
+          .on('error', function(err) {
+            plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+            this.emit('end');
+          })
+        .pipe(plugins.csscomb(config.options.autoprefSorter))
+          .on('error', function(err) {
+            plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+            this.emit('end');
+          })
+        .pipe(isProduction ? plugins.base64() : plugins.util.noop())
+          .on('error', function(err) {
+            plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+            this.emit('end');
+          })
+        .pipe(gulp.dest(config.src.destCssPrefix));
 });
-gulp.task('cssMin', function () {
-  return gulp.src([paths.styles.temp + '*.css', '!' + paths.styles.temp + '*.min.css'])
-    .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
-    .pipe(isProduction ? plugins.cssmin({keepSpecialComments:0}) : plugins.util.noop())
-    //.pipe(plugins.rename({suffix: '.min'}))
-    .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
-    .pipe(isProduction ? gulp.dest(paths.styles.prod) : gulp.dest(paths.styles.dev))
+// -------------------------------------
+//   Task: Lint: CSS files
+// -------------------------------------
+gulp.task('lint:css', function() {
+  return gulp.src(config.src.srcCssLint())
+    .pipe(isProduction ? plugins.util.noop() : plugins.stylelint(config.options.lintCss))
       .on('error', function(err) {
-          plugins.notify.onError({ title: 'cssMin error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
       });
 });
-gulp.task('styleBuild', function() {
-  runSequence(
-    'copySass',
-    'replaceSassPx',
-    'lintSass',
-    'sassCompile',
-    'retinaSpriteUrl',
-    'svgSpriteUrl',
-    'preFix',
-    'cssLint',
-    'cssMin',
-    function() {
-      reload({ stream: true })
-  })
-});
-
-
-// Handle scripts
-gulp.task('scriptLint', function() {
-  return gulp.src(paths.scripts.src + '*.js')
-    .pipe(isProduction ? plugins.util.noop() : plugins.jshint('.jshintrc'))
+// -------------------------------------
+//   Task: Generate: CSS statistics
+// -------------------------------------
+gulp.task('gen:cssStats', function() {
+  return gulp.src(config.src.srcCssStat())
+    .pipe(isProduction ? plugins.util.noop() : plugins.parker(config.options.parkerConf))
       .on('error', function(err) {
-          plugins.notify.onError({ title: 'scriptLint error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(plugins.jshint.reporter('jshint-stylish'));
-});
-gulp.task('scriptFix', function() {
-  return gulp.src(paths.scripts.src + '*.js')
-    .pipe(isProduction ? plugins.util.noop() : plugins.fixmyjs())
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'scriptFix error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(gulp.dest(paths.scripts.src));
-});
-gulp.task('scriptModernizr', function() {
-  return gulp.src(paths.scripts.src + '*.js')
-    .pipe(plugins.modernizr())
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'scriptModernizr error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(isProduction ? gulp.dest(paths.scripts.prod) : gulp.dest(paths.scripts.dev))
-});
-gulp.task('concatScripts', function() {
-  return gulp.src(paths.scripts.src + '*.js')
-    .pipe(plugins.concat('main.js'))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'concatScripts error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
-      })
-    .pipe(gulp.dest(paths.scripts.temp));
-});
-gulp.task('scriptMin', function() {
-  return gulp.src(paths.scripts.temp + 'main.js')
-    .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
-    .pipe(plugins.rename('main.min.js'))
-    .pipe(isProduction ? plugins.uglify() : plugins.util.noop())
-    .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
-    .pipe(isProduction ? gulp.dest(paths.scripts.prod) : gulp.dest(paths.scripts.dev))
-      .on('error', function(err) {
-          plugins.notify.onError({ title: 'scriptMin error!', message: '<%= error.message %>', sound: 'Frog' })(err);
-          this.emit('end');
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
       });
 });
-gulp.task('scriptBuild', function() {
-    runSequence(
-      'scriptLint',
-      'scriptFix',
-      'scriptModernizr',
-      'concatScripts',
-      'scriptMin',
-      function() {
-        reload({ stream: true })
-    })
+// -------------------------------------
+//   Task: Minify: CSS files
+// -------------------------------------
+gulp.task('minify:css', function() {
+  return gulp.src(config.src.srcCssMinify())
+    .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
+    .pipe(isProduction ? plugins.cssnano(config.options.cssNano) : plugins.util.noop())
+    .pipe(plugins.rename({suffix: '.min'}))
+    .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
+    .pipe(gulp.dest(config.src.paths.styles.prod))
+      .on('error', function(err) {
+        plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+        this.emit('end');
+      });
+});
+// -------------------------------------
+//   MultiTask: Style tasklist
+// -------------------------------------
+gulp.task('styleBuild', function(done) {
+  runSequence(['copy:sass'], 'fix:sass', 'compile:sass',  'fix:css:retina', 'fix:css:sprites', 'prefix:css', 'lint:css', 'minify:css', function() {
+    done();
+  });
 });
 
 
-// Webserver tasks
-gulp.task('build', function() {
-    runSequence(
-      ['cleanUp'],
-      'htmlBuild',
-      'imageBuild',
-      'styleBuild',
-      'scriptBuild'
-    );
+// -------------------------------------
+//   MultiTask: Whole build procedure
+// -------------------------------------
+gulp.task('buildAll', function(done) {
+  runSequence(['clear:all'], 'imageBuild', 'styleBuild', 'scriptBuild', function(error) {
+    if (error) console.log(error.message);
+    done();
+  });
 });
-// TODO: watch tasks must be updated after gulp 4.0
-gulp.task('nightWatch', ['serve'], function() {
-    gulp.watch(paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
-        changeEvent(evt);
-    });
-    gulp.watch(paths.scripts.src + '**/*.js', ['scriptBuild']).on('change', function(evt) {
-        changeEvent(evt);
-    });
-    gulp.watch(paths.images.src + '**/*.{png,svg,jpg,gif}', ['imageBuild']).on('change', function(evt) {
-        changeEvent(evt);
-    });
+
+// -------------------------------------
+//   MultiTask: Report/test tasklist
+// -------------------------------------
+gulp.task('buildReports', function(done) {
+  runSequence('gen:todo', 'gen:cssStats', /* coverage and other will come here,*/ function() {
+    done();
+  });
 });
+
+// -------------------------------------
+//   MultiTask: Extra tasklist
+// -------------------------------------
+// ----- Only for testing purposes -----
+gulp.task('buildExtra', function(done) {
+  runSequence(['copy:fonts', 'copy:index'], 'copy:fontsFinal', 'htmlBuild', function() {
+    done();
+  });
+});
+
+
+// -------------------------------------
+//   Task: Start local server
+// -------------------------------------
 gulp.task('serve', function() {
-    browserSync({
-        open: true,
-        reloadOnRestart: true,
-        server: {
-            baseDir: paths.scripts.dev
-        }
+  browserSync({
+    server: {
+      baseDir: config.src.basePaths.prod
+    },
+    startPath: './',
+    open: true,
+    reloadOnRestart: true,
+    //logLevel: 'debug',
+    logConnections: true
+  });
+});
+
+// -------------------------------------
+//   Task: Start watching local files
+// -------------------------------------
+gulp.task('nightWatch', ['serve'], function() {
+    gulp.watch(config.src.paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
+        changeEvent(evt);
+    });
+    gulp.watch(config.src.paths.scripts.src + '**/*.js', ['scriptBuild']).on('change', function(evt) {
+        changeEvent(evt);
     });
 });

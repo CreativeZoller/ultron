@@ -17,9 +17,12 @@ npm-debug.log
 
 backstop_data
 app
-devApp
-dist
-_todo.md
+_Public
+_Development
+Dist
+results
+tests
+_*
 TODO.md
 TODO.json
 secretConf.json

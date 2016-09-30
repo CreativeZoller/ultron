@@ -1,9 +1,0 @@
-linters:
-  Comment:
-    enabled: false
-
-  EmptyLineBetweenBlocks:
-    enabled: false
-
-  PropertySpelling:
-    enabled: false

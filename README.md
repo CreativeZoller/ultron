@@ -20,7 +20,13 @@ If you have some other packages installed, try `npm prune` to uninstall not used
 
 I also suggest to configure the included [BackstopJS](https://github.com/garris/BackstopJS) module also, which checks the official Bootstrap by default.
 
-// TODO: install.sh with chmod 777 ./install.sh
+With also installing the `npm-check` package, you can use it to interactively manage your outdated dependencies by typing in `npm-check -u`.
+
+For checking dependencies (not 100% usable) install the depcheck package by `npm i -g depcheck` command and use it whenever you want with typing `depcheck`.
+
+// TODO: install.sh with chmod 777 ./install.sh ++ ./install.sh
+// ?     "gulp-autoprefixer": "^3.1.1",
+
 ### Dependencies
 The package don't have any dependencies. But I recommend using of Gulp v3.9.1 or newer.
 
