@@ -5,45 +5,7 @@
 // *************************************
 //
 // Available tasks w/ gulp naming tag
-//   `build`
-//   `buildAll`
-//   `buildExtra`
-//   `buildReports`
-//   `htmlBuild`
-//   `imageBuild`
-//   `nightWatch`
-//   `serve`
-//   `scriptBuild`
-//   `styleBuild`
-//   `clear:all`
-//   `clear:tempImages`
-//   `clear:tempStyles`
-//   `compile:sass`
-//   `concat:js`
-//   `copy:fonts`
-//   `copy:images`
-//   `copy:index`
-//   `copy:sass`
-//   `fix:js`
-//   `fix:css:retina`
-//   `fix:css:sprites`
-//   `fix:sass`
-//   `gen:cssStats`
-//   `gen:modernizr`
-//   `gen:todo`
-//   `inject:html`
-//   `lint:html`
-//   `lint:css`
-//   `lint:js`
-//   `minify:css`
-//   `minify:html`
-//   `minify:images`
-//   `minify:js`
-//   `prefix:css`
-//   `sprites:png`
-//   `sprites:retina`
-//   `sprites:svg`
-//
+//  ...
 // *************************************
 'use strict';
 var gulp    = require('gulp'),
@@ -55,49 +17,17 @@ var gulp    = require('gulp'),
         replaceString: /\bgulp[\-.]/
     }),
     taskPath = './gulptasks/',
-    config = require('./gulptasks/config'),
+    gConfig = require('./gulptasks/gulp-config'),
     taskList = require('fs').readdirSync(taskPath);
 
-function getTask(task) {
-    return require(taskPath + task)(gulp, config, plugins);
-}
-
-// TODO proper testings: karma for 2e2 and jasmine for coverage like this (karma + phantomjs in jasmine)
-// > http://syropia.net/journal/javascript-testing-with-jasmine-and-gulp-redux
-// TODO: add mocha+jasmine testing with coverage report  > https://github.com/dylanb/gulp-coverage
-// TODO: new backstop testing
-
-// TODO: make travis use install.sh with chmod 777
-// TODO: change to new commiting, also use it from now: check my emails by esailor
 
 
-// TODO: egyenlore kiszedni, kesobb fixaltan feldarabolni
-//taskList.forEach(getTask);
-//gulp.task('cleanTasks', getTask('clean'));
-//gulp.task('scriptTasks', getTask('scripts-all'));
 // -------------------------------------
 //   Modules > taskfiles
 // -------------------------------------
 //
-// gulp              : The streaming build system
-// gulp-autoprefixer : Prefix CSS
-// gulp-coffee       : Compile CoffeeScript files
-// gulp-coffeelint   : Lint your CoffeeScript
-// gulp-concat       : Concatenate files
-// gulp-csscss       : CSS redundancy analyzer
-// gulp-jshint       : JavaScript code quality tool
-// gulp-load-plugins : Automatically load Gulp plugins
-// gulp-minify-css   : Minify CSS
-// gulp-parker       : Stylesheet analysis tool
-// gulp-plumber      : Prevent pipe breaking from errors
-// gulp-rename       : Rename files
-// gulp-sass         : Compile Sass
-// gulp-svgmin       : Minify SVG files
-// gulp-svgstore     : Combine SVG files into one
-// gulp-uglify       : Minify JavaScript with UglifyJS
-// gulp-util         : Utility functions
-// gulp-watch        : Watch stream
-// run-sequence      : Run a series of dependent Gulp tasks in order
+//  gulp              : The streaming build system
+//  ...
 //
 // -------------------------------------
 var del = require('del');
@@ -105,20 +35,18 @@ var fs = require('fs');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
-var through = require('through2');
-var sprity = require('sprity');
 
 var isProduction = false;
 if(plugins.util.env.deploy === true) isProduction = true;
 var changeEvent = function(evt) {
-    plugins.util.log('File', evt.path.replace(new RegExp('/.*(?=/' + config.src.basePaths.src + ')/'), ''), 'was', evt.type);
+    plugins.util.log('File', evt.path.replace(new RegExp('/.*(?=/' + gConfig.src.basePaths.src + ')/'), ''), 'was', evt.type);
 };
 
 // -------------------------------------
 //   Task: Clear: Everything
 // -------------------------------------
 gulp.task('clear:all', function () {
-  return del(config.src.srcCleanUp());
+  return del(gConfig.src.srcCleanUp());
 });
 
 
@@ -127,35 +55,35 @@ gulp.task('clear:all', function () {
 //   Task: Generate: TODO file
 // -------------------------------------
 gulp.task('gen:todo', function() {
-    return gulp.src(config.src.srcTodo())
-        .pipe(plugins.todo())
-        .pipe(gulp.dest(config.src.destTodo))
-        .pipe(plugins.todo.reporter('json', {fileName: 'todo.json'}))
-        .pipe(gulp.dest(config.src.destTodo))
+  return gulp.src(gConfig.src.srcTodo())
+    .pipe(plugins.todo())
+    .pipe(gulp.dest(gConfig.src.destTodo))
+    .pipe(plugins.todo.reporter('json', {fileName: 'todo.json'}))
+    .pipe(gulp.dest(gConfig.src.destTodo))
 });
 // -------------------------------------
 //   Task: Copy: FontAwesome icons
 // -------------------------------------
 gulp.task('copy:fonts', function() { 
-  return gulp.src(config.src.paths.fonts.src) 
-    .pipe(gulp.dest(config.src.paths.fonts.temp));
+  return gulp.src(gConfig.src.paths.fonts.src) 
+    .pipe(gulp.dest(gConfig.src.paths.fonts.temp));
 });
 gulp.task('copy:fontsFinal', function() { 
-  return gulp.src(config.src.paths.fonts.tmp2) 
-    .pipe(gulp.dest(config.src.paths.fonts.prod));
+  return gulp.src(gConfig.src.paths.fonts.tmp2) 
+    .pipe(gulp.dest(gConfig.src.paths.fonts.prod));
 });
 // -------------------------------------
 //   Task: Copy: Test html file
 // -------------------------------------
 gulp.task('copy:index', function() { 
-  return gulp.src('index.html') 
-  .pipe(gulp.dest(config.src.basePaths.prod)); 
+  return gulp.src(gConfig.src.basePaths.srcView) 
+  .pipe(gulp.dest(gConfig.src.basePaths.prod)); 
 });
 // -------------------------------------
 //   Task: Lint: Html files
 // -------------------------------------
 gulp.task('lint:html', function() {
-  return gulp.src([config.src.basePaths.prod + '**/*.html', config.src.basePaths.root + '/*.html'])
+  return gulp.src([gConfig.src.basePaths.prod + '**/*.html', gConfig.src.basePaths.root + '/*.html'])
     .pipe(isProduction ? plugins.util.noop() : plugins.htmlhint('.htmlhintrc'))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
@@ -167,25 +95,25 @@ gulp.task('lint:html', function() {
 //   Task: Inject: to Html files
 // -------------------------------------
 gulp.task('inject:html', function() {
-  return gulp.src([config.src.basePaths.root + '*.html', config.src.basePaths.prod + '*.html'])
-    .pipe(plugins.inject(gulp.src([config.src.paths.scripts.prod + '*.js', config.src.paths.styles.prod + '*.css'], {read: true}), {relative: true}))
+  return gulp.src([gConfig.src.basePaths.root + '*.html', gConfig.src.basePaths.prod + '*.html'])
+    .pipe(plugins.inject(gulp.src([gConfig.src.paths.scripts.prod + '*.js', gConfig.src.paths.styles.prod + '*.css'], {read: true}), {relative: true}))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.basePaths.prod));
+    .pipe(gulp.dest(gConfig.src.basePaths.prod));
 });
 // -------------------------------------
 //   Task: Minify: Html files
 // -------------------------------------
 gulp.task('minify:html', function() {
-  return gulp.src(config.src.basePaths.prod + '*.html')
-    .pipe(isProduction ? plugins.htmlmin(config.options.htmlMin) : plugins.util.noop())
+  return gulp.src(gConfig.src.basePaths.prod + '*.html')
+    .pipe(isProduction ? plugins.htmlmin(gConfig.options.htmlMin) : plugins.util.noop())
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-		.pipe(gulp.dest(config.src.basePaths.prod));
+		.pipe(gulp.dest(gConfig.src.basePaths.prod));
 });
 // -------------------------------------
 //   MultiTask: Html tasklist
@@ -202,8 +130,8 @@ gulp.task('htmlBuild', function(done) {
 //   Task: Lint: JavaScript files
 // -------------------------------------
 gulp.task('lint:js', function() {
-  return gulp.src(config.src.srcJSLint)
-    .pipe(plugins.changed(config.src.paths.scripts.src))
+  return gulp.src(gConfig.src.srcJSLint)
+    .pipe(plugins.changed(gConfig.src.paths.scripts.src))
     .pipe(isProduction ? plugins.util.noop() : plugins.jshint('.jshintrc'))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
@@ -215,49 +143,49 @@ gulp.task('lint:js', function() {
 //   Task: Fix: JavaScript files
 // -------------------------------------
 gulp.task('fix:js', function() {
-  return gulp.src(config.src.srcJSLint)
-    .pipe(plugins.changed(config.src.paths.scripts.src))
+  return gulp.src(gConfig.src.srcJSLint)
+    .pipe(plugins.changed(gConfig.src.paths.scripts.src))
     .pipe(isProduction ? plugins.util.noop() : plugins.fixmyjs())
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.paths.scripts.src));
+    .pipe(gulp.dest(gConfig.src.paths.scripts.src));
 });
 // -------------------------------------
 //   Task: Generate: Modernizr Scripts
 // -------------------------------------
 gulp.task('gen:modernizr', function() {
-  return gulp.src(config.src.srcJSLint)
-    .pipe(plugins.modernizr(config.options.modernizr))
+  return gulp.src(gConfig.src.srcJSLint)
+    .pipe(plugins.modernizr(gConfig.options.modernizr))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.paths.scripts.prod))
+    .pipe(gulp.dest(gConfig.src.paths.scripts.prod))
 });
 // -------------------------------------
 //   Task: Concatenate: JavaScript files
 // -------------------------------------
 gulp.task('concat:js', function() {
-  return gulp.src(config.src.srcJSLint)
-    .pipe(plugins.concat(config.src.ccJSName))
+  return gulp.src(gConfig.src.srcJSLint)
+    .pipe(plugins.concat(gConfig.src.ccJSName))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.paths.scripts.temp));
+    .pipe(gulp.dest(gConfig.src.paths.scripts.temp));
 });
 // -------------------------------------
 //   Task: Minify: JavaScript files
 // -------------------------------------
 gulp.task('minify:js', function() {
-  return gulp.src(config.src.paths.scripts.temp + config.src.ccJSName)
+  return gulp.src(gConfig.src.paths.scripts.temp + gConfig.src.ccJSName)
     .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
     .pipe(plugins.rename('main.min.js'))
     .pipe(isProduction ? plugins.uglify() : plugins.util.noop())
     .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
-    .pipe(gulp.dest(config.src.paths.scripts.prod))
+    .pipe(gulp.dest(gConfig.src.paths.scripts.prod))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
@@ -277,7 +205,7 @@ gulp.task('scriptBuild', function(done) {
 //   Task: Spritesheet: Png, Jpg files
 // -------------------------------------
 gulp.task('sprites:png', function() {
-    var spritePngs = gulp.src(config.src.paths.images.src + '*.{png,jpg}')
+    var spritePngs = gulp.src(gConfig.src.paths.images.src + '*.{png,jpg}')
       .pipe(plugins.spritesmith({
         algorithm: 'binary-tree',
         cssFormat: 'sass',
@@ -288,47 +216,47 @@ gulp.task('sprites:png', function() {
           plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
           this.emit('end');
         })
-    spritePngs.img.pipe(gulp.dest(config.src.paths.images.temp));
-    spritePngs.css.pipe(gulp.dest(config.src.paths.styles.temp));
+    spritePngs.img.pipe(gulp.dest(gConfig.src.paths.images.temp));
+    spritePngs.css.pipe(gulp.dest(gConfig.src.paths.styles.temp));
 });
 
 // -------------------------------------
 //   Task: Spritesheet: Retina files
 // -------------------------------------
 gulp.task('sprites:retina', function() {
-  var spriteData = gulp.src(config.src.srcRetineSprites)
+  var spriteData = gulp.src(gConfig.src.srcRetineSprites)
     .pipe(plugins.spritesmith({
       algorithm: 'binary-tree',
-      retinaSrcFilter: config.src.srcBRetinaSprites,
-      imgName: config.src.nameRetinaImg,
-      retinaImgName: config.src.nameBRetinaImg,
-      cssName: config.src.nameRetinaCss
+      retinaSrcFilter: gConfig.src.srcBRetinaSprites,
+      imgName: gConfig.src.nameRetinaImg,
+      retinaImgName: gConfig.src.nameBRetinaImg,
+      cssName: gConfig.src.nameRetinaCss
     }))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-  spriteData.img.pipe(gulp.dest(config.src.destRetinaImg));
-  spriteData.css.pipe(gulp.dest(config.src.destRetinaCss));
+  spriteData.img.pipe(gulp.dest(gConfig.src.destRetinaImg));
+  spriteData.css.pipe(gulp.dest(gConfig.src.destRetinaCss));
 });
 // -------------------------------------
 //   Task: Spritesheet: SVG files
 // -------------------------------------
 gulp.task('sprites:svg', function() {
-  return gulp.src(config.src.srcSvgSprites)
-    .pipe(plugins.svgSprite(config.options.svgSprite))
+  return gulp.src(gConfig.src.srcSvgSprites)
+    .pipe(plugins.svgSprite(gConfig.options.svgSprite))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.destSvgSprites));
+    .pipe(gulp.dest(gConfig.src.destSvgSprites));
 });
 // -------------------------------------
 //   Task: Copy: Image files
 // -------------------------------------
 gulp.task('copy:images', function() { 
-  return gulp.src(config.src.srcImages) 
-    .pipe(gulp.dest(config.src.destImages))
+  return gulp.src(gConfig.src.srcImages) 
+    .pipe(gulp.dest(gConfig.src.destImages))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
@@ -338,13 +266,13 @@ gulp.task('copy:images', function() { 
 //   Task: Minify: Image files
 // -------------------------------------
 gulp.task('minify:images', function() {
-  return gulp.src(config.src.srcMinifyImf)
-    .pipe(isProduction ? plugins.imagemin(config.options.imageMin) : plugins.util.noop())
+  return gulp.src(gConfig.src.srcMinifyImf)
+    .pipe(isProduction ? plugins.imagemin(gConfig.options.imageMin) : plugins.util.noop())
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.paths.images.prod));
+    .pipe(gulp.dest(gConfig.src.paths.images.prod));
 });
 // -------------------------------------
 //   MultiTask: Image tasklist
@@ -360,8 +288,8 @@ gulp.task('imageBuild', function(done) {
 //   Task: Copy: SCSS files
 // -------------------------------------
 gulp.task('copy:sass', function() { 
-  return gulp.src(config.src.srcSassCopy) 
-    .pipe(gulp.dest(config.src.destSassCopy))
+  return gulp.src(gConfig.src.srcSassCopy) 
+    .pipe(gulp.dest(gConfig.src.destSassCopy))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
@@ -371,7 +299,7 @@ gulp.task('copy:sass', function() { 
 //   Task: Fix: SCSS files
 // -------------------------------------
 gulp.task('fix:sass', function() {
-	return gulp.src(config.src.srcSassFix)
+	return gulp.src(gConfig.src.srcSassFix)
 		.pipe(plugins.replaceTask({
 			patterns: [{
 				match: /0px/g,
@@ -382,58 +310,58 @@ gulp.task('fix:sass', function() {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-		.pipe(gulp.dest(config.src.destSassFix));
+		.pipe(gulp.dest(gConfig.src.destSassFix));
 });
 // -------------------------------------
 //   Task: Compile: SCSS files
 // -------------------------------------
 gulp.task('compile:sass', function() {
-  return gulp.src(config.src.srcSassComp())
+  return gulp.src(gConfig.src.srcSassComp())
     .pipe(plugins.sass.sync())
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-    .pipe(gulp.dest(config.src.destSassComp));
+    .pipe(gulp.dest(gConfig.src.destSassComp));
 });
 // -------------------------------------
 //   Task: Fix: CSS files, Part 1
 // -------------------------------------
 gulp.task('fix:css:retina', function() {
-  return gulp.src(config.src.srcCssRetina)
-    .pipe(plugins.replaceTask(config.options.ssRetina))
+  return gulp.src(gConfig.src.srcCssRetina)
+    .pipe(plugins.replaceTask(gConfig.options.ssRetina))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-		.pipe(gulp.dest(config.src.destCssRetina));
+		.pipe(gulp.dest(gConfig.src.destCssRetina));
 });
 // -------------------------------------
 //   Task: Fix: CSS files, Part 2
 // -------------------------------------
 gulp.task('fix:css:sprites', function() {
-  return gulp.src(config.src.srcCssSprites)
-    .pipe(plugins.replaceTask(config.options.cssSprites))
+  return gulp.src(gConfig.src.srcCssSprites)
+    .pipe(plugins.replaceTask(gConfig.options.cssSprites))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
       })
-		.pipe(gulp.dest(config.src.destCssSprites));
+		.pipe(gulp.dest(gConfig.src.destCssSprites));
 });
 // -------------------------------------
 //   Task: Fix and Reorder: CSS files
 // -------------------------------------
 gulp.task('prefix:css', function() {
     var autoprefixer = require('autoprefixer');
-    return gulp.src(config.src.srcCssPrefix())
+    return gulp.src(gConfig.src.srcCssPrefix())
         .pipe(plugins.postcss([
-          autoprefixer(config.options.autoprefBrowsers)
+          autoprefixer(gConfig.options.autoprefBrowsers)
         ]))
           .on('error', function(err) {
             plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
             this.emit('end');
           })
-        .pipe(plugins.csscomb(config.options.autoprefSorter))
+        .pipe(plugins.csscomb(gConfig.options.autoprefSorter))
           .on('error', function(err) {
             plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
             this.emit('end');
@@ -443,14 +371,14 @@ gulp.task('prefix:css', function() {
             plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
             this.emit('end');
           })
-        .pipe(gulp.dest(config.src.destCssPrefix));
+        .pipe(gulp.dest(gConfig.src.destCssPrefix));
 });
 // -------------------------------------
 //   Task: Lint: CSS files
 // -------------------------------------
 gulp.task('lint:css', function() {
-  return gulp.src(config.src.srcCssLint())
-    .pipe(isProduction ? plugins.util.noop() : plugins.stylelint(config.options.lintCss))
+  return gulp.src(gConfig.src.srcCssLint())
+    .pipe(isProduction ? plugins.util.noop() : plugins.stylelint(gConfig.options.lintCss))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
@@ -460,8 +388,8 @@ gulp.task('lint:css', function() {
 //   Task: Generate: CSS statistics
 // -------------------------------------
 gulp.task('gen:cssStats', function() {
-  return gulp.src(config.src.srcCssStat())
-    .pipe(isProduction ? plugins.util.noop() : plugins.parker(config.options.parkerConf))
+  return gulp.src(gConfig.src.srcCssStat())
+    .pipe(isProduction ? plugins.util.noop() : plugins.parker(gConfig.options.parkerConf))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
@@ -471,12 +399,12 @@ gulp.task('gen:cssStats', function() {
 //   Task: Minify: CSS files
 // -------------------------------------
 gulp.task('minify:css', function() {
-  return gulp.src(config.src.srcCssMinify())
+  return gulp.src(gConfig.src.srcCssMinify())
     .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
-    .pipe(isProduction ? plugins.cssnano(config.options.cssNano) : plugins.util.noop())
+    .pipe(isProduction ? plugins.cssnano(gConfig.options.cssNano) : plugins.util.noop())
     .pipe(plugins.rename({suffix: '.min'}))
     .pipe(isProduction ? plugins.sourcemaps.write('.') : plugins.util.noop())
-    .pipe(gulp.dest(config.src.paths.styles.prod))
+    .pipe(gulp.dest(gConfig.src.paths.styles.prod))
       .on('error', function(err) {
         plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
         this.emit('end');
@@ -502,14 +430,6 @@ gulp.task('buildAll', function(done) {
   });
 });
 
-// -------------------------------------
-//   MultiTask: Report/test tasklist
-// -------------------------------------
-gulp.task('buildReports', function(done) {
-  runSequence('gen:todo', 'gen:cssStats', /* coverage and other will come here,*/ function() {
-    done();
-  });
-});
 
 // -------------------------------------
 //   MultiTask: Extra tasklist
@@ -523,12 +443,22 @@ gulp.task('buildExtra', function(done) {
 
 
 // -------------------------------------
+//   MultiTask: Report/test tasklist
+// -------------------------------------
+gulp.task('buildReports', function(done) {
+  runSequence('gen:todo', 'gen:cssStats', function() {
+    done();
+  });
+});
+
+
+// -------------------------------------
 //   Task: Start local server
 // -------------------------------------
 gulp.task('serve', function() {
   browserSync({
     server: {
-      baseDir: config.src.basePaths.prod
+      baseDir: gConfig.src.basePaths.prod
     },
     startPath: './',
     open: true,
@@ -542,10 +472,10 @@ gulp.task('serve', function() {
 //   Task: Start watching local files
 // -------------------------------------
 gulp.task('nightWatch', ['serve'], function() {
-    gulp.watch(config.src.paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
+    gulp.watch(gConfig.src.paths.styles.src + '**/*.scss', ['styleBuild']).on('change', function(evt) {
         changeEvent(evt);
     });
-    gulp.watch(config.src.paths.scripts.src + '**/*.js', ['scriptBuild']).on('change', function(evt) {
+    gulp.watch(gConfig.src.paths.scripts.src + '**/*.js', ['scriptBuild']).on('change', function(evt) {
         changeEvent(evt);
     });
 });

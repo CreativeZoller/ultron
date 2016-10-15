@@ -1,17 +1,15 @@
-// Karma configuration
-// Generated on Sun Mar 20 2016 00:46:10 GMT+0100 (CET)
-
 module.exports = function(config) {
+  'use strict';
   var configuration = {
     basePath: '',
     frameworks: ['jasmine'],
     files: [
-      'src/scripts/main.js',
-      'src/tests/mySpec.js'
+      'src/scripts/*.js',
+      'src/tests/myKarmaTests.js'
     ],
     browsers : ['PhantomJS'],
     singleRun : true,
-    reporters: ['progress'],
+    reporters: ['progress','coverage'],
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
@@ -24,6 +22,17 @@ module.exports = function(config) {
         base: 'Chrome',
         flags: ['--no-sandbox']
       }
+    },
+    preprocessors: {
+        'src/**/*.js': ['coverage']
+    },
+    coverageReporter: {
+        dir: 'results/coverage/',
+        reporters: [
+            { type: 'lcov', subdir: 'report-lcov' },
+            { type: 'text-summary', subdir: '.', file: 'coverage-summary.txt' },
+            { type: 'text' },
+        ]
     },
   };
   config.set(configuration);

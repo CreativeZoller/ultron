@@ -22,6 +22,7 @@ _Development
 Dist
 results
 tests
+coverage
 _*
 TODO.md
 TODO.json
