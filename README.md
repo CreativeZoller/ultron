@@ -25,7 +25,12 @@ With also installing the `npm-check` package, you can use it to interactively ma
 For checking dependencies (not 100% usable) install the depcheck package by `npm i -g depcheck` command and use it whenever you want with typing `depcheck`.
 
 // TODO: install.sh with chmod 777 ./install.sh ++ ./install.sh
-// ?     "gulp-autoprefixer": "^3.1.1",
+// TODO: sudo chmod -R a+rwx /mappaneve > minden project mappan
+// TODO: check everything and rewrite readme as part of the Ultron v2.0.0
+// TODO: backstop installing, `npm install -g backstopjs` also needed to use these cmds:
+// `backstop reference` > creating and updating reference images by backstop.json
+// `backstop test` > generating test and open the result page in browser
+// backstopJS: https://github.com/garris/BackstopJS
 
 ### Dependencies
 The package don't have any dependencies. But I recommend using of Gulp v3.9.1 or newer.
