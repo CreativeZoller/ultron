@@ -1,10 +1,6 @@
 'use strict';
 var pngQuant = require('imagemin-pngquant');
 
-/**
- * @name tasks:config
- * @description gives support to every task which using any configurations
- */
 module.exports = {
   src: {
     basePaths : {

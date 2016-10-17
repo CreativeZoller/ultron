@@ -5,6 +5,40 @@
 // *************************************
 //
 // Available tasks w/ gulp naming tag
+//  clear:all       Clear every temporary files & folders
+//  copy:fonts      Copy FontAwesome icons to source
+//  copy:fontsFinal Copy FontAwesome icons to final destination
+//  copy:index      Copy test html file
+//  lint:html       Lint Html files
+//  inject:html     Inject to Html files
+//  minify:html     Minify Html files
+//  sprites:png     Spritesheet for Png, Jpg files
+//  sprites:retina  Spritesheet for Retina files
+//  sprites:svg     Spritesheet for SVG files
+//  copy:images     Copy image files
+//  minify:images   Optimise omage files
+//  gen:TODO        Generate TODO file
+//  gen:cssStats    Generate CSS statistics
+//  lint:js         Lint JavaScript files
+//  fix:js          Fix JavaScript files
+//  concat:js       Concatenate JavaScript files
+//  gen:modernizr   Generate Modernizr Scripts
+//  minify:js       Minify JavaScript files
+//  copy:sass       Copy 3rd-party SCSS files
+//  fix:sass        Fix SCSS files
+//  compile:sass    Compile SCSS files
+//  fix:css:retina  Fix CSS files, Part 1
+//  fix:css:sprites Fix CSS files, Part 2
+//  prefix:css      Fix and reorder CSS files
+//  lint:css        Lint CSS files
+//  minify:css      Minify CSS files
+//  serve           Start local server
+//  htmlBuild       MultiTask: Html tasklist
+//  imageBuild      MultiTask: Image tasklist
+//  buildReports    MultiTask: Report/test tasklist
+//  scriptBuild     MultiTask: Script tasklist
+//  styleBuild      MultiTask: Style tasklist
+//  nightWatch      Start watching files after local server started
 //
 // *************************************
 'use strict';
