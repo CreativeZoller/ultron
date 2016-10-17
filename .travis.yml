@@ -10,7 +10,5 @@ before_install:
   - npm install -g karma
 install:
   - ./install.sh
-  # - npm install
-  # - bower install && bower prune
 before_script:
   - cp -r Extra/src/ src/

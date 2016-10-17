@@ -178,6 +178,9 @@ Try run **`npm test`** to see if your Jasmine tests are working correctly. It al
 5. Submit a pull request :D
 
 ## History
+**v.0.2.0**
+Ultron package is updated, restructured and fastened up for more precise workflow
+
 **v.0.1.0**
 first version of the Ultron package is made and published as GitHub repository
 
