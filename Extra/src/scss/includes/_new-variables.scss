@@ -1,7 +1,6 @@
 // Define new variables
 // --------------------------------------------------
 
-
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
@@ -94,7 +93,7 @@ $border-radius-large:       6px;
 $border-radius-small:       3px;
 
 //** Global color for active items (e.g., navs or dropdowns).
-$component-active-color:    #fff;
+$component-active-color:    $body-bg;
 //** Global background color for active items (e.g., navs or dropdowns).
 $component-active-bg:       $brand-primary;
 
@@ -132,26 +131,26 @@ $table-border-color:            #ddd;
 $btn-font-weight:                normal;
 
 $btn-default-color:              #333;
-$btn-default-bg:                 #fff;
+$btn-default-bg:                 $body-bg;
 $btn-default-border:             #ccc;
 
-$btn-primary-color:              #fff;
+$btn-primary-color:              $body-bg;
 $btn-primary-bg:                 $brand-primary;
 $btn-primary-border:             darken($btn-primary-bg, 5%);
 
-$btn-success-color:              #fff;
+$btn-success-color:              $body-bg;
 $btn-success-bg:                 $brand-success;
 $btn-success-border:             darken($btn-success-bg, 5%);
 
-$btn-info-color:                 #fff;
+$btn-info-color:                 $body-bg;
 $btn-info-bg:                    $brand-info;
 $btn-info-border:                darken($btn-info-bg, 5%);
 
-$btn-warning-color:              #fff;
+$btn-warning-color:              $body-bg;
 $btn-warning-bg:                 $brand-warning;
 $btn-warning-border:             darken($btn-warning-bg, 5%);
 
-$btn-danger-color:               #fff;
+$btn-danger-color:               $body-bg;
 $btn-danger-bg:                  $brand-danger;
 $btn-danger-border:              darken($btn-danger-bg, 5%);
 
@@ -164,7 +163,7 @@ $btn-link-disabled-color:        $gray-light;
 //##
 
 //** `<input>` background color
-$input-bg:                       #fff;
+$input-bg:                       $body-bg;
 //** `<input disabled>` background color
 $input-bg-disabled:              $gray-lighter;
 
@@ -217,6 +216,48 @@ $zindex-modal-background:  1040;
 $zindex-modal:             1050;
 
 
+//== Media queries breakpoints
+// Extra small screen / phone
+$screen-xs:                  34.2857142857em;  // 480px / 14 = 34.2857142857em
+$screen-xs-min:              $screen-xs;
+$screen-phone:               $screen-xs-min;
+// Small screen / tablet
+$screen-sm:                  54.8571428571em;  // 768px / 14 = 54.8571428571em
+$screen-sm-min:              $screen-sm;
+$screen-tablet:              $screen-sm-min;
+// Medium screen / desktop
+$screen-md:                  70.8571428571em;  // 992px / 14 = 70.8571428571em
+$screen-md-min:              $screen-md;
+$screen-desktop:             $screen-md-min;
+// Large screen / wide desktop
+$screen-lg:                  85.7142857143em; // 1200px / 14 = 85.7142857143em
+$screen-lg-min:              $screen-lg;
+$screen-lg-desktop:          $screen-lg-min;
+
+
+
+//== Grid system
+//** Number of columns in the grid.
+$grid-columns:              12;
+//** Padding between columns. Gets divided in half for the left and right.
+$grid-gutter-width:         30px;
+// Navbar collapse
+//** Point at which the navbar becomes uncollapsed.
+$grid-float-breakpoint:     $screen-sm-min;
+//** Point at which the navbar begins collapsing.
+$grid-float-breakpoint-max: ($grid-float-breakpoint - 1);
+
+
+//== Container sizes
+
+// Small screen / tablet
+$container-tablet:             (720px + $grid-gutter-width);  // 720px / 14 = 51.4285714286em
+// Medium screen / desktop
+$container-desktop:            (940px + $grid-gutter-width);  // 940px / 14 = 67.1428571429em
+// Large screen / wide desktop
+$container-large-desktop:      (1140px + $grid-gutter-width); // 1140px / 14 = 81.4285714286em
+
+
 //== Navbar
 // Basics of a navbar
 $navbar-height:                    50px;
@@ -256,7 +297,7 @@ $navbar-inverse-border:                     darken($navbar-inverse-bg, 10%);
 
 // Inverted navbar links
 $navbar-inverse-link-color:                 lighten($gray-light, 15%);
-$navbar-inverse-link-hover-color:           #fff;
+$navbar-inverse-link-hover-color:           $body-bg;
 $navbar-inverse-link-hover-bg:              transparent;
 $navbar-inverse-link-active-color:          $navbar-inverse-link-hover-color;
 $navbar-inverse-link-active-bg:             darken($navbar-inverse-bg, 10%);
@@ -265,12 +306,12 @@ $navbar-inverse-link-disabled-bg:           transparent;
 
 // Inverted navbar brand label
 $navbar-inverse-brand-color:                $navbar-inverse-link-color;
-$navbar-inverse-brand-hover-color:          #fff;
+$navbar-inverse-brand-hover-color:          $body-bg;
 $navbar-inverse-brand-hover-bg:             transparent;
 
 // Inverted navbar toggle
 $navbar-inverse-toggle-hover-bg:            #333;
-$navbar-inverse-toggle-icon-bar-bg:         #fff;
+$navbar-inverse-toggle-icon-bar-bg:         $body-bg;
 $navbar-inverse-toggle-border-color:        #333;
 
 
@@ -302,19 +343,19 @@ $nav-pills-active-link-hover-color:         $component-active-color;
 
 //== Pagination
 $pagination-color:                     $link-color;
-$pagination-bg:                        #fff;
+$pagination-bg:                        $body-bg;
 $pagination-border:                    #ddd;
 
 $pagination-hover-color:               $link-hover-color;
 $pagination-hover-bg:                  $gray-lighter;
 $pagination-hover-border:              #ddd;
 
-$pagination-active-color:              #fff;
+$pagination-active-color:              $body-bg;
 $pagination-active-bg:                 $brand-primary;
 $pagination-active-border:             $brand-primary;
 
 $pagination-disabled-color:            $gray-light;
-$pagination-disabled-bg:               #fff;
+$pagination-disabled-bg:               $body-bg;
 $pagination-disabled-border:           #ddd;
 
 
@@ -366,9 +407,9 @@ $label-warning-bg:            $brand-warning;
 $label-danger-bg:             $brand-danger;
 
 //** Default label text color
-$label-color:                 #fff;
+$label-color:                 $body-bg;
 //** Default text color of a linked label
-$label-link-hover-color:      #fff;
+$label-link-hover-color:      $body-bg;
 
 
 //== Modals
@@ -381,7 +422,7 @@ $modal-title-padding:         15px;
 $modal-title-line-height:     $line-height-base;
 
 //** Background color of modal content area
-$modal-content-bg:                             #fff;
+$modal-content-bg:                             $body-bg;
 //** Modal content border color
 $modal-content-border-color:                   rgba(0,0,0,.2);
 //** Modal content border color **for IE8**
@@ -425,7 +466,7 @@ $alert-danger-border:         $state-danger-border;
 
 //== List group
 //** Background color on `.list-group-item`
-$list-group-bg:                 #fff;
+$list-group-bg:                 $body-bg;
 //** `.list-group-item` border color
 $list-group-border:             #ddd;
 //** List group border radius
@@ -457,4 +498,4 @@ $list-group-link-heading-color: #333;
 //== Close
 $close-font-weight:           bold;
 $close-color:                 #000;
-$close-text-shadow:           0 1px 0 #fff;
+$close-text-shadow:           0 1px 0 $body-bg;

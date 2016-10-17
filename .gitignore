@@ -14,14 +14,10 @@ node_modules
 bower_components
 CVS
 npm-debug.log
-
-backstop_data
 app
 _Public
-_Development
-Dist
+backstop_data
 results
-tests
 coverage
 _*
 TODO.md

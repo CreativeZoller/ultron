@@ -1,22 +1,39 @@
 'use strict';
-(function () {
-  var a = [];
-  var b = {};
-  var c = [];
-  var d;
-  c = undefined;
-  a === null;
-  var e;
-  var foo = new Foo();
-  foo([
-    1,
-    2,
-    3
-  ]);
-  a = 1;
-  a++;
-  var x = 1;
-  isNaN(a);
-  !isNaN(a);
-  var q = 0.25;
+var defaultCases = (function() {
+  var sum = 0;
+  return {
+    add: function() {
+      sum = sum + 1;
+      return sum;
+    },
+    reset: function() {
+      return sum = 0;
+    }
+  }
 }());
+var actOne = defaultCases.add();
+var actTwo = defaultCases.add();
+var actThree = defaultCases.reset();
+
+function testFunctionOne(a, b) {
+  return a * b;
+}
+var My = {
+  sqrt: function (x) {
+    if (x < 0) {
+      throw new Error('sqrt can\'t work on negative number');
+    }
+    return Math.exp(Math.log(x) / 2);
+  }
+};
+function runRight() {
+  var currentDate = new Date().toLocaleTimeString();
+  console.log('I am ready @' + currentDate);
+}
+
+var state = document.readyState;
+if(state === 'interactive' || state === 'complete') {
+  runRight();
+} else {
+  document.addEventListener('DOMContentLoaded', runRight(), false);
+}
