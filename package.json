@@ -12,7 +12,6 @@
   "main": "gulpfile.js",
   "scripts": {
     "postinstall": "npm prune",
-    "bakcstop": "backstop reference && backstop test",
     "test": "karma start karma.conf.js --single-run"
   },
   "devDependencies": {

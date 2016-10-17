@@ -38,6 +38,8 @@
 //  buildReports    MultiTask: Report/test tasklist
 //  scriptBuild     MultiTask: Script tasklist
 //  styleBuild      MultiTask: Style tasklist
+//  buildAll        MultiTask: Whole build procedure
+//  buildExtra      MultiTask: Extra tasklist > for tests
 //  nightWatch      Start watching files after local server started
 //
 // *************************************
