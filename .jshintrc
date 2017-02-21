@@ -23,6 +23,8 @@
   "globals": {
     "angular": false,
     "Hammer": false,
-    "Modernizr": false
+    "Modernizr": false,
+    "$": false,
+    "jQuery": false
  }
 }

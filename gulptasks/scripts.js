@@ -1,4 +1,3 @@
-//TODO: fix 'jQuery' is not defined. error in linting
 'use strict';
 var runSequence = require('run-sequence');
 
@@ -10,8 +9,8 @@ module.exports = function (gulp, gConfig, plugins) {
   // -------------------------------------
   //   Task: Copy: 3rd party JS files
   // -------------------------------------
-  gulp.task('copy:js', function() { 
-    return gulp.src(gConfig.src.paths.scripts.srcThirdPt) 
+  gulp.task('copy:js', function() {
+    return gulp.src(gConfig.src.paths.scripts.srcThirdPt)
       .pipe(gulp.dest(gConfig.src.paths.scripts.prod))
         .on('error', function(err) {
           plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));

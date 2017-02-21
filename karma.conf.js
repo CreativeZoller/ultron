@@ -4,7 +4,8 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['jasmine'],
     files: [
-      'src/scripts/*.js',
+      { pattern: 'https://code.jquery.com/jquery-1.11.2.min.js', watched: false },
+      '_Public/**/!(jquery|angular).min.js',
       'src/tests/myKarmaTests.js'
     ],
     browsers : ['PhantomJS'],
@@ -17,6 +18,12 @@ module.exports = function(config) {
     phantomjsLauncher: {
       exitOnResourceError: true
     },
+    plugins: [
+      'karma-coverage',
+      'karma-jasmine',
+      'karma-phantomjs-launcher',
+      'karma-spec-reporter'
+    ],
     customLaunchers: {
       Chrome_travis_ci: {
         base: 'Chrome',
@@ -24,7 +31,7 @@ module.exports = function(config) {
       }
     },
     preprocessors: {
-        'src/**/*.js': ['coverage']
+        '_Public/**/!(jquery|angular).min.js': ['coverage']
     },
     coverageReporter: {
         dir: 'results/coverage/',

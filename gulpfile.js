@@ -91,11 +91,3 @@ gulp.task('buildExtra', function(done) {
     done();
   });
 });
-
-//TODO: gulp/scripts + main
-//TODO: inject for karma_test with buildExtras
-
-//TODO: check and update test tasks
-//TODO: travis update for: gem install scss_lint | gem install scss_lint_reporter_checkstyle
-
-//TODO: update gulpfile + readme to v.2.1.0
