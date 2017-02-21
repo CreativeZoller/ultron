@@ -1,23 +1,94 @@
 <!DOCTYPE html>
-<html lang="">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Dynamic Front-End tasks - testing</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noindex">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <!-- inject:css -->
-        <!-- endinject -->
-    </head>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="Zoltan Belicza" />
+    <meta name="robots" content="noindex" />
+    <title>Dynamic Front-End tasks - testing</title>
+    <!-- inject:css -->
+    <!-- endinject -->
+  </head>
   <body>
-    <h1>Welcome!</h1>
-    <div id="test">Gulp it</div>
-    <span class="fa fa-shield"></span>
-    <p>Haml Style!</p>
-    <img src="images/t6ship.png" alt="nothing to see here, really" />
+    <header class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          The Game Experience <span class="fa fa-shield"></span>
+        </div>
+      </div>
+    </header>
+    <section class="list">
+      <div class="jumbotron">
+        <div class="container">
+          <div class="col-xs-12 col-sm-12 col-lg-8 col-lg-offset-2">
+            <h2>Rock, Paper, Scissors <small>Player versus CPU</small></h2>
+          </div>
+          <div class="row newRound">
+            <div class="col-xs-12 col-sm-12 col-lg-8 col-lg-offset-2">
+              <label class="col-xs-12 text-center roundStatus"></label>
+              <span class="col-xs-12 text-center roundRule"></span>
+            </div>
+          </div>
+          <div class="row g-rsp-all chooseWisely">
+            <div class="col-xs-12 col-sm-12 col-lg-8 col-lg-offset-2 baseSelect">
+              <div class="col-xs-4 col-lg-3 col-lg-offset-1">
+                <img src="images/svg/rock.svg" alt="rock stone" class="g-rock g-choose"/>
+              </div>
+              <div class="col-xs-4 col-lg-3 col-lg-offset-1">
+                <img src="images/svg/paper.svg" alt="paper" class="g-paper g-choose"/>
+              </div>
+              <div class="col-xs-4 col-lg-3 col-lg-offset-1">
+                <img src="images/svg/scissors.svg" alt="scissors" class="g-scissor g-choose"/>
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-lg-8 col-lg-offset-2 choosedOnes">
+              <div class="col-xs-4 col-sm-4 col-sm-offset-1 userChoose choosen">
+                <span class="g-text-title text-center">Player</span>
+                <div class="g-img-chosen userChoose"></div>
+              </div>
+              <div class="col-xs-4 col-xs-offset-4 col-sm-4 col-sm-offset-2 cpuChoose choosen">
+                <span class="g-text-title text-center">CPU</span>
+                <div class="g-img-computer cpuChoose"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row separator">
+            <div class="col-xs-12 col-sm-12 col-lg-8 col-lg-offset-2">
+              <div class="alert alert-info">
+                <p class="text-center">
+                  Wins: <span class="wins"></span>
+                  Losses: <span class="losses"></span>
+                  Ties: <span class="ties"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer>
+      <div class="container text-center">
+        <div class="social-links">
+          <a href="#"><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-facebook fa-stack-1x fa-inverse"></i></span></a>
+          <a href="#"><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-tumblr fa-stack-1x fa-inverse"></i></span></a>
+          <a href="#"><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-pinterest-p fa-stack-1x fa-inverse"></i></span></a>
+          <a href="#"><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-twitter fa-stack-1x fa-inverse"></i></span></a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li class="fnItem"><a href="#">Product Selection</a></li>
+          <li class="fnItem"><a href="#">Services</a></li>
+          <li class="fnItem"><a href="#">Marketplace</a></li>
+          <li class="fnItem"><a href="#">About Us</a></li>
+          <li class="fnItem"><a href="#">Imprint</a></li>
+          <li class="fnItem"><a href="#">Help</a></li>
+          <li class="fnItem"><a href="#">Termns &amp; Conditions</a></li>
+        </ul>
+      </div>
+    </footer>
     <!-- inject:js -->
     <!-- endinject -->
+    <!-- <script src="lib/bootstrap/js/bootstrap.min.js"></script> -->
 </body>
 </html>
