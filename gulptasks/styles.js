@@ -93,6 +93,11 @@ module.exports = function (gulp, gConfig, plugins) {
   // -------------------------------------
   gulp.task('minify:css', function() {
     return gulp.src(gConfig.src.srcCssMinify())
+      .pipe(plugins.groupCssMediaQueries())
+        .on('error', function(err) {
+          plugins.util.log(plugins.util.colors.red.bold('[ERROR]:'),plugins.util.colors.bgRed(err.message));
+          this.emit('end');
+        })
       .pipe(isProduction ? plugins.sourcemaps.init() : plugins.util.noop())
       .pipe(isProduction ? plugins.cssnano(gConfig.options.cssNano) : plugins.util.noop())
       .pipe(plugins.rename({suffix: '.min'}))

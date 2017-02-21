@@ -1,3 +1,4 @@
+//TODO: fix 'jQuery' is not defined. error in linting
 'use strict';
 var runSequence = require('run-sequence');
 
@@ -78,7 +79,7 @@ module.exports = function (gulp, gConfig, plugins) {
   //   MultiTask: Script tasklist
   // -------------------------------------
   gulp.task('scriptBuild', function(done) {
-    runSequence(['compile:js', 'lint:js'], 'concat:js', 'copy:js', 'minify:js', function() {
+    runSequence(['compile:js'], 'lint:js', 'concat:js', 'copy:js', 'minify:js', function() {
       done();
     });
   });

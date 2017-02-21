@@ -92,7 +92,10 @@ gulp.task('buildExtra', function(done) {
   });
 });
 
-//TODO: convert main.js into es2016 mode
+//TODO: gulp/scripts + main
 //TODO: inject for karma_test with buildExtras
-//TODO: update readme to v.2.1.0
+
+//TODO: check and update test tasks
 //TODO: travis update for: gem install scss_lint | gem install scss_lint_reporter_checkstyle
+
+//TODO: update gulpfile + readme to v.2.1.0
