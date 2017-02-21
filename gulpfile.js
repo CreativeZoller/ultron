@@ -68,6 +68,11 @@ require(taskPath + 'server')(gulp, gConfig, plugins);
 // -------------------------------------
 //   MultiTask: Whole build procedure
 // -------------------------------------
+//   imageBuild: png spritesheet, png retina spritesheet, image copy, minify(prod)
+//   stylebuild: scss copy, scss lint(dev), scss compile, retina scss fix, css autoprefix, css comb,
+//               css lint(prod), minify(prod)
+//   scriptBuild: comile js, js lint(dev), concatenate js, copy 3rd party js, minify js(prod)
+// -------------------------------------
 gulp.task('buildAll', function(done) {
   runSequence(['clear:all'], 'imageBuild', 'styleBuild', 'scriptBuild', function(error) {
     if (error) console.log(error.message);
@@ -76,10 +81,18 @@ gulp.task('buildAll', function(done) {
 });
 
 // -------------------------------------
-//   MultiTask: Extra tasklist > for tests
+//   MultiTask: Extra tasklist > for test purposes only
+// -------------------------------------
+//   fontsFinal: copy FontAwesome fonts
+//   htmlBuild: lint html, inject minified styles and scripts to html
 // -------------------------------------
 gulp.task('buildExtra', function(done) {
   runSequence(['copy:fonts', 'copy:index'], 'copy:fontsFinal', 'htmlBuild', function() {
     done();
   });
 });
+
+//TODO: convert main.js into es2016 mode
+//TODO: inject for karma_test with buildExtras
+//TODO: update readme to v.2.1.0
+//TODO: travis update for: gem install scss_lint | gem install scss_lint_reporter_checkstyle

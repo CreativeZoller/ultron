@@ -1,53 +1,389 @@
-//@import 'sprites';
-@import 'svg_sprites';
-@import 'retinaSprites';
+@import 'mixins/selection', 'mixins/clearfix', 'mixins/queries', 'sprites', 'retinaSprites';
 
-.agenda-date,
-.agenda-current {
-  width: 160px;
+
+$white: #ffffff;
+$bluish: #37adbf;
+$blackish: #888888;
+$greyish: #4d4d4d;
+$greyish-sec: #666666;
+$greyish-third: #bebebe;
+$greyish-four: #aaaaaa;
+$greenish: #e74c3c;
+
+// overall
+html {
+  overflow-y: scroll;
 }
 
-.agenda-date {
+body {
+  -webkit-box-direction: normal;
+  -webkit-box-orient: vertical;
+  display: flex;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  -ms-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+}
 
-  .dayofmonth {
-    float: left;
-    font-size: 36px;
-    line-height: 36px;
-    margin-right: 10px;
-    text-align: right;
-    width: 40px;
-  }
+@include placeholder {
+  background: $bluish;
+  color: $white;
+}
 
-  .shortdate {
-    font-size: .75em;
-    display: flex;
+// header
+.navbar {
+  border: 0 transparent none;
+
+  &.navbar-default {
+    background: transparent url(../images/navbarBg.png) top center repeat-x;
+    box-shadow: 0px 5px 8px $blackish;
+
+    .container {
+      height: 90px;
+    }
   }
 }
 
-.social {
-  display: block;
-  height: 32px;
-  width: 32px;
+// footer
+footer {
+  background-color: $greyish;
+  border-top: 28px solid $greyish-sec;
+  height: auto;
+  min-height: 155px;
+  width: 100%;
 
-  &-fork {
-    @include retina-sprite($fork-group);
+  .social-links {
+    margin-bottom: 20px;
+    margin-top: 24px;
+
+    a {
+      color: $white;
+      display: inline-block;
+      outline: none;
+      &.visited {
+        color: $white;
+      }
+      &:hover, &:focus {
+        color: $bluish;
+        cursor: pointer;
+        text-decoration: none;
+
+        .fa-inverse {
+          color: $white;
+        }
+      }
+
+      .fa-inverse {
+        color: $greyish;
+      }
+    }
   }
 
-  &-github {
-    @include retina-sprite($github-group);
-  }
+  .navbar-nav {
+    float: none;
+    margin: 0 auto;
 
-  &-twitter {
-    @include retina-sprite($twitter-group);
+    @include small {
+      margin-bottom: 34px;
+      min-width: 279px;
+      width: 100%;
+
+    }
+    @include mobile {
+      margin-bottom: 40px;
+    }
+    @include desktop {
+      width: 510px;
+    }
+
+    .fnItem {
+      @include small {
+        height: 30px;
+      }
+      @include mobile {
+        height: 38px;
+      }
+      @include tablet {
+        float: none;
+      }
+      @include desktop {
+        border-right: 1px solid $greyish-third;
+        float: left;
+        height: 13px;
+        &:last-child {
+          border-right: 0 none;
+        }
+      }
+    }
+
+    a {
+      background-color: transparent;
+      color: $white;
+
+      @include small {
+        color: $greyish-third;
+        font-size: 18px;
+        line-height: 30px;
+        outline: none;
+        padding: 0;
+      }
+      @include mobile {
+        font-size: 18px;
+        line-height: 38px;
+      }
+      @include desktop {
+        color: $greyish-third;
+        font-size: 12px;
+        line-height: 12px;
+        outline: none;
+        padding: 0 5px;
+      }
+      &.visited {
+        color: $white;
+
+        @include small {
+          color: $greyish-third;
+        }
+        @include desktop {
+          color: $greyish-third;
+        }
+      }
+      &:hover, &:focus {
+        background-color: $bluish;
+        color: $white;
+
+        @include small {
+          background-color: $bluish;
+          color: $white;
+          cursor: pointer;
+          text-decoration: none;
+
+        }
+        @include desktop {
+          background-color: transparent;
+          color: $bluish;
+          cursor: pointer;
+          text-decoration: none;
+        }
+      }
+    }
   }
 }
 
-span {
-  font-size: 22px;
-  margin: 0 6px;
+// bootstrap others
+h2, .navbar-header {
+  color: $bluish;
+  font-size: 30px;
+  margin-bottom: 10px;
+  margin-top: 20px;
+
+  @include small {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 10px 0;
+  }
+  @include mobile {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 45px 0 0;
+  }
+  @include tablet {
+    font-size: 26px;
+    font-weight: 900;
+    margin: 65px 38px 0;
+  }
 }
 
-ol {
-  list-style: none;
-  margin-left: -22px;
+h2 {
+  @include desktop {
+    font-size: 26px;
+    font-weight: 900;
+    margin: 50px 0 0;
+  }
+}
+
+.navbar-header {
+  @include small {
+    margin: 28px 0 0;
+    text-align: center;
+  }
+  @include mobile {
+    margin: 30px 0 0;
+  }
+  @include tablet {
+    margin: 26px 0 0;
+  }
+  @include desktop {
+    font-weight: 26px;
+    font-weight: 900;
+  }
+};
+
+.jumbotron {
+  margin: 0;
+
+  .container {
+    min-height: 274px;
+  }
+}
+
+.list {
+  -webkit-box-flex: 1;
+  -ms-flex: 1 0 auto;
+  -webkit-flex: 1 0 auto;
+  flex: 1 0 auto;
+  height: auto;
+
+  > .container {
+    height: auto;
+    margin-bottom: 30px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+// custom elements
+.newRound {
+  margin-left: 0;
+  margin-right: 0;
+
+  .roundStatus {
+    font-weight: bold;
+    margin-top: 12px;
+    text-transform: uppercase;
+
+    @include tablet {
+      font-size: 110%;
+      margin-top: 24px;
+    }
+    @include desktop {
+      font-size: 120%;
+      margin-top: 28px;
+    }
+  }
+
+  .roundRule {
+    font-size: 140%;
+    margin-bottom: 36px;
+    margin-top: 8px;
+  }
+}
+
+.separator {
+  margin-left: -15px;
+  margin-right: -15px;
+  margin-top: 20px;
+
+  .wins, .losses, .ties {
+    font-size: 100%;
+    margin-right: 8px;
+  }
+  .wins {
+    font-size: 110%;
+  }
+  .losses {
+    color: $greenish;
+  }
+}
+
+.chooseWisely {
+
+  .default, .choosen, .winner, .looser {
+    opacity: 1;
+  }
+
+  .baseSelect, .choosedOnes {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .baseSelect {
+    margin-bottom: 12px;
+
+    .g-choose {
+      border: 2px solid transparent;
+      border-radius: 10%;
+      cursor: pointer;
+      max-width: 320px;
+      overflow: hidden;
+      transition: all .1s;
+      &:active, &:focus, &:hover {
+        background: $greyish-four;
+      }
+    }
+  }
+  .choosedOnes {
+    border-top: 2px solid $greyish-sec;
+    margin-top: 24px;
+    padding-top: 12px;
+
+    span {
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    img[class^="g-img-"] {
+      background: $white;
+      border-radius: 50%;
+      bottom: 0;
+      left: 0;
+      margin: auto;
+      margin-left: -12.5px;
+      max-height: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      padding: 20px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: all .3s;
+      &:hover, &:focus, &:active {
+        background: transparent;
+        cursor: default !important;
+      }
+    }
+
+    > .userChoose, > .cpuChoose {
+      cursor: pointer;
+      text-decoration: none;
+
+      .g-text-title {
+        display: block;
+        font-size: 1.5em !important;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .cpuChoose, .userChoose {
+        background-color: $white;
+        border-radius: 10%;
+
+        @include small {
+          height: 130px;
+          width: 130px;
+        }
+        @include mobile {
+          height: 155px;
+          width: 155px;
+        }
+        @include tablet {
+          height: 210px;
+          margin-left: 0;
+          width: 210px;
+        }
+      }
+
+      .userChoose.default, .cpuChoose.default {
+        opacity: 1;
+      }
+    }
+  }
+  img {
+    width: 100%;
+  }
 }

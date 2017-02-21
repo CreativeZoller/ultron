@@ -3,160 +3,87 @@ var pngQuant = require('imagemin-pngquant');
 
 module.exports = {
   src: {
-    basePaths : {
-        root: './',
-        src: 'src/',
-        prod: '_Public/',
-        temp: '.tmp/',
-        bower: 'bower_components/',
-        test: 'src/tests/',
-        devFiles: '_Development/**/*',
-        prodFiles: '_Public/**/*',
-        tempFiles: '.tmp/**/*',
-        srcFonts: 'src/scss/fonts/*',
-        srcMaps: 'src/**/*.map',
-        srcView: 'Extra/index.html'
-    },
     paths : {
-        images: {
-          src: 'src/images/',
-          temp: '.tmp/images/',
-          prod: '_Public/images/'
-        },
-        scripts: {
-          src: 'src/scripts/',
-          temp: '.tmp/scripts/',
-          prod: '_Public/scripts/'
-        },
-        styles: {
-          src: 'src/scss/',
-          temp: '.tmp/scss/',
-          prod: '_Public/styles/'
-        },
-        fonts: {
-          src: 'bower_components/font-awesome/fonts/**.*',
-          temp: 'src/scss/fonts/',
-          tmp2: 'src/scss/fonts/**.*',
-          prod: '_Public/fonts/',
-        }
+      images: {
+        prod: '_Public/images/',
+        temp: '.tmp/images/',
+        tempFiles: '.tmp/images/*.{gif,jpg,png,svg}',
+        srcFiles: ['src/images/*.{gif,jpg,png,svg}', 'src/images/svg/*'],
+        srcSpriteFiles: 'src/images/sprites/*.{png,jpg}',
+        srcRSpriteFiles: 'src/images/sprites2x/*.png',
+      },
+      scripts: {
+        prod: '_Public/scripts/',
+        temp: '.tmp/scripts/',
+        tempFiles: '.tmp/scripts/*.js',
+        srcThirdPt: 'bower_components/jquery/dist/jquery.min.js',
+        srcFiles: 'src/scripts/*.js',
+      },
+      styles: {
+        prod: '_Public/styles/',
+        temp: '.tmp/scss/',
+        tempFiles: '.tmp/scss/*.scss',
+        srcFiles: 'src/scss/**/*.scss',
+      },
+      fonts: {
+        prod: '_Public/fonts/',
+        temp: 'src/scss/fonts/',
+        tempFiles: 'src/scss/fonts/*',
+        srcFiles: 'bower_components/font-awesome/fonts/**.*',
+      },
+      prod: '_Public/',
+      destTest: './results/',
+      src: 'src/',
+      srcView: 'Extra/index.html',
+      srcInjView: '_Public/*.html',
     },
-
     srcCleanUp: function () {
-      return ['_Public/**/*', '.tmp/**/*', 'src/scss/fonts/*', 'src/**/*.map',
-        'results/*'];
+      return ['_Public/**/*', '.tmp/**/*', 'src/scss/fonts/**/*', 'src/**/*.map', 'results/**/*'];
     },
-    srcJSLint: 'src/scripts/*.js',
-    ccJSName: 'main.js',
+    srcExInj: function () {
+      return ['_Public/scripts/*.min.js', '_Public/styles/*.min.css'];
+    },
     srcTodo: function () {
-      return ['**/*.html', '**/*.sh', '**/*.js', '**/*.scss', '**/*.css', '!_*', '!node_modules/**/*',
+      return ['**/*.{html,sh,js,scss,css}', '!_*', '!node_modules/**/*',
         '!bower_components/**/*', '!backstop_data/**/*', '!src/images/**/*'];
-    },
-    destTodo: 'results/',
-    srcPngSprites : 'src/images/*.{png,jpg}',
-    namePngSprites: 'src/scss/sprites.scss',
-    srcRetineSprites: 'src/images/sprites2x/*.png',
-    srcBRetinaSprites: 'src/images/sprites2x/*@2x.png',
-    nameRetinaCss: 'retinaSprites.scss',
-    nameRetinaImg: 'spritesheet.png',
-    nameBRetinaImg: 'retinaSprites.png',
-    destRetinaImg: '.tmp/images/',
-    destRetinaCss: '.tmp/scss/',
-    srcSvgSprites: 'src/images/**/*.svg',
-    destSvgSprites: '.',
-    srcImages: 'src/images/*.{gif,jpg,png,svg}',
-    destImages: '.tmp/images/',
-    srcMinifyImf: '.tmp/images/*.{gif,jpg,png,svg}',
-    srcSassCopy: 'src/scss/**/*.scss',
-    destSassCopy: '.tmp/scss/',
-    srcSassLint: function () {
-      return ['.tmp/scss/**/*.scss', '!.tmp/scss/includes/*.scss', '!.tmp/scss/bootstrap.scss',
-        '!.tmp/scss/fontawesome.scss', '!.tmp/scss/sprites.scss', '!.tmp/scss/retinaSprites.scss',
-        '!.tmp/scss/svg_sprites.scss'];
-    },
-    srcSassFix: '.tmp/scss/**/*.scss',
-    destSassFix: '.tmp/scss/',
-    srcSassComp: function () {
-      return ['.tmp/scss/*.scss', '!.tmp/scss/sprites.scss', '!.tmp/scss/retinaSprites.scss',
-        '!.tmp/scss/svg_sprites.scss']
-    },
-    destSassComp: '.tmp/scss/',
-    srcCssRetina: '.tmp/scss/retinaSprites.css',
-    destCssRetina: '.tmp/scss/',
-    srcCssSprites: '.tmp/scss/main.css',
-    destCssSprites: '.tmp/scss/',
-    srcCssPrefix: function () {
-      return ['.tmp/scss/*.css', '!.tmp/scss/bootstrap.css', '!.tmp/scss/*.min.css']
-    },
-    destCssPrefix: '.tmp/scss/',
-    srcCssLint: function () {
-      return ['.tmp/scss/*.css', '!.tmp/scss/*.min.css', '!.tmp/scss/bootstrap.css',
-        '!.tmp/scss/fontawesome.css']
     },
     srcCssStat: function () {
       return ['.tmp/scss/*.css', '!.tmp/scss/*.min.css', '!.tmp/scss/bootstrap.css',
-        '!.tmp/scss/fontawesome.css']
+        '!.tmp/scss/fontawesome.css'];
+    },
+    srcSassComp: function () {
+      return ['.tmp/scss/*.scss', '!.tmp/scss/sprites.scss', '!.tmp/scss/retinaSprites.scss',
+        '!.tmp/scss/svg_sprites.scss'];
+    },
+    srcCssPrefix: function () {
+      return ['.tmp/scss/*.css', '!.tmp/scss/bootstrap.css', '!.tmp/scss/*.min.css'];
+    },
+    srcCssLint: function () {
+      return ['.tmp/scss/*.css', '!.tmp/scss/*.min.css', '!.tmp/scss/bootstrap.css',
+        '!.tmp/scss/fontawesome.css'];
     },
     srcCssMinify: function () {
-      return ['.tmp/scss/*.css', '!.tmp/scss/*.min.css']
+      return ['.tmp/scss/*.css', '!.tmp/scss/*.min.css'];
     }
   },
   options: {
-    htmlMin: {
-      removeComments: true,
-			removeCommentsFromCDATA: true,
-			removeCDATASectionsFromCDATA: true,
-			collapseWhitespace: true,
-			collapseInlineTagWhitespace: true,
-			conservativeCollapse: true,
-			preserveLineBreaks: true,
-			removeScriptTypeAttributes: true
+    sprites: {
+      algorithm: 'binary-tree',
+      imgName: 'sprites.png',
+      cssName: 'sprites.scss'
     },
-    modernizr: {
-      'classPrefix': 'has-',
-      'options': [
-        'addTest',
-        'setClasses',
-        'testAllProps'
-      ],
-      'feature-detects': [
-        "audio",
-        "canvas",
-        "cookies",
-        "css/all",
-        "dom/microdata",
-        "es5/array",
-        "es6/array",
-        "geolocation",
-        "inputtypes",
-        "json",
-        "queryselector",
-        "svg",
-        "userdata",
-        "webanimations"
-      ]
+    retinaSprites: {
+      algorithm: 'binary-tree',
+      retinaSrcFilter: 'src/images/sprites2x/*@2x.png',
+      imgName: 'spritesheet.png',
+      retinaImgName: 'retinaSprites.png',
+      cssName: 'retinaSprites.scss'
     },
-    svgSprite: {
-      dest : './',
-      shape : {
-        dimension : {
-          maxWidth: 128,
-          maxHeight: 128
-        },
-        spacing: {
-          padding: 10
-        }
-      },
-      mode : {
-        css : {
-          dest : './',
-          sprite : '.tmp/images/sprites.svg',
-          render : {
-            scss : {
-              dest : '.tmp/scss/svg_sprites.scss'
-            }
-          }
-        }
-      }
+    todo: {
+      fileName: 'todo.json'
+    },
+    babel: {
+      presets: ['es2015']
     },
     imageMin: {
       progressive: true,
@@ -164,25 +91,19 @@ module.exports = {
       optimizationLevel: 7,
       use: [pngQuant()]
     },
-    ssRetina: {
+    fixRetina: {
       patterns: [{
 				match: /sprite/g,
 				replacement: '../images/sprite'
 			}]
     },
-    cssSprites: {
-      patterns: [{
-				match: /tmp/g,
-				replacement: '.'
-			}]
-    },
-    autoprefBrowsers: {
+    autoPrefix: {
       browsers: ['> 10%', 'last 2 Chrome versions', 'last 2 Firefox versions', 'last 2 Opera versions', 'last 2 Safari versions', 'not ie <= 10']
     },
-    autoprefSorter: {
+    cssComb: {
       config: 'csscomb.json'
     },
-    lintCss: {
+    cssLint: {
       failAfterError: false,
       reportOutputDir: '.',
       reporters: [
@@ -191,7 +112,12 @@ module.exports = {
       ],
       debug: true
     },
-    parkerConf: {
+    scssLint: {
+      'config': '.scss_lint.yml',
+      'reporterOutputFormat': 'Checkstyle',
+      'filePipeOutput': 'scssReport.xml'
+    },
+    parker: {
       file: 'results/css-stats.md',
       title: 'Style statistics report',
       metrics: [
@@ -214,6 +140,15 @@ module.exports = {
       discardDuplicates: true,
       discardEmpty: true
     },
-    smtg: {}
+    htmlInject: {
+      patterns: [
+        {
+          match: /.css">/g,
+          replacement: function () {
+            return '.css" />';
+          }
+        }
+      ]
+    }
   }
-};
+}
