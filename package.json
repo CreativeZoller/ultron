@@ -1,6 +1,6 @@
 {
   "name": "ultron",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Ultron is a development dependency for future projects. It is a basic frame for front-end tasks, including some test functions.",
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-base64": "^0.1.3",
+    "gulp-bump": "^2.7.0",
     "gulp-concat": "^2.6.0",
     "gulp-csscomb": "^3.0.8",
     "gulp-csslint": "^1.0.0",
@@ -63,7 +64,8 @@
     "postcss-discard-empty": "^2.1.0",
     "postcss-merge-rules": "^2.1.2",
     "postcss-ordered-values": "^2.2.2",
-    "run-sequence": "^1.2.2"
+    "run-sequence": "^1.2.2",
+    "yargs": "^6.6.0"
   },
   "dependencies": {
     "browser-sync": "^2.16.1"

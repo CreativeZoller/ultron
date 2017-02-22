@@ -1,5 +1,6 @@
 {
   "name": "ultron",
+  "version": "0.2.1",
   "description": "Ultron is a development dependency for future projects. It is a basic frame for front-end tasks, including some test functions.",
   "main": "gulpfile.js",
   "authors": [

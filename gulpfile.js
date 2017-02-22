@@ -54,7 +54,8 @@ var gulp    = require('gulp'),
     }),
     taskPath = './gulptasks/',
     gConfig = require('./gulptasks/gulp-config'),
-    runSequence = require('run-sequence');
+    runSequence = require('run-sequence'),
+    args = require('yargs').argv;
 
 require(taskPath + 'clean')(gulp, gConfig, plugins);
 require(taskPath + 'reports')(gulp, gConfig, plugins);
@@ -90,4 +91,25 @@ gulp.task('buildExtra', function(done) {
   runSequence(['copy:fonts', 'copy:index'], 'copy:fontsFinal', 'htmlBuild', function() {
     done();
   });
+});
+
+// -------------------------------------
+//   Task: Bump version number
+// -------------------------------------
+gulp.task('versionBump', function () {
+    var type = args.type,
+        version = args.version,
+        msg,
+        options = {};
+    if (version) {
+        options.version = version;
+        msg += ' to ' + version;
+    } else {
+        options.type = type;
+        msg += ' for a ' + type;
+    }
+    return gulp
+        .src(['./package.json', './bower.json'])
+        .pipe(plugins.bump(options))
+        .pipe(gulp.dest('./'));
 });
